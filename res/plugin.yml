@@ -1,0 +1,85 @@
+name: MagicWells
+version: 0.0.0
+description: Adds magic wells
+author: acomputerdog
+main: net.acomputerdog.magicwells.PluginMagicWells
+
+permissions:
+  magicwells.feature.*:
+    description: Use all MW features
+    default: op
+    children:
+      magicwells.feature.wish: true
+      magicwells.feature.port.*: true
+
+  magicwells.feature.port.*:
+    description: Use all port-related features
+    default: op
+    children:
+      magicwells.feature.port.random: true
+      magicwells.feature.port.home: true
+      magicwells.feature.port.other: true
+
+  magicwells.feature.wish:
+    description: Wish for treasure at a well
+    default: true
+  magicwells.feature.port.random:
+    description: Travel from one well to a random other
+    default: true
+  magicwells.feature.port.home:
+    description: Travel from one well to your "home" well
+    default: true
+  magicwells.feature.port.other:
+    description: Travel from one well to any other
+    default: true
+
+  magicwells.command.mwreload:
+    description: use /mwreload
+    default: op
+  magicwells.command.mwlist:
+    description: use /mwlist
+    default: op
+  magicwells.command.mwport:
+    description: use /mwport
+    default: op
+  magicwells.command.mwrecheck:
+    description: use /mwrecheck
+    default: op
+  magicwells.command.mwinfo:
+    description: use /mwinfo
+    default: true
+  magicwells.command.mwrepair:
+    description: use /mwrepair
+    default: true
+
+commands:
+  mwreload:
+    description: Reload the plugin
+    permission: magicwells.command.mwreload
+    usage: /mwreload
+    aliases: [magicwellsreload]
+  mwlist:
+    description: List all wells
+    permission: magicwells.command.mwlist
+    usage: /mwlist
+    aliases: [magicwellslist]
+  mwport:
+    description: Port to a well
+    permission: magicwells.command.mwport
+    usage: /mwport <well_name>
+    aliases: [magicwellsport]
+  mwrecheck:
+    description: Verify that all wells are intact and unobstructed, and update the list as necessary
+    permission: magicwells.command.mwrecheck
+    usage: /mwrecheck
+    aliases: [magicwellsrecheck]
+  mwinfo:
+    description: Get info on wells that you own
+    permission: magicwells.command.mwinfo
+    usage: /mwinfo [well_name]
+    aliases: [magicwellinfo]
+  mwrepair:
+    description: Reactivate a damaged well
+    permission: magicwells.command.mwrepair
+    usage: /mwrepair [well_name]
+    aliases: [magicwellrepair]
