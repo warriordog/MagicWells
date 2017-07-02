@@ -16,9 +16,11 @@ public class WellNamer {
         this.random = new Random();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(new File(plugin.getDataFolder(), "syllables.lst")))) {
-            String line = reader.readLine().trim();
-            if (!line.isEmpty() && !line.startsWith("#")) {
-                syllables.add(line);
+            while (reader.ready()) {
+                String line = reader.readLine().trim();
+                if (!line.isEmpty() && !line.startsWith("#")) {
+                    syllables.add(line);
+                }
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Syllables file is missing.", e);

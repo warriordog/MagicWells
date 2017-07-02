@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/run_dir/plugins/</output-path>
     <root id="archive" name="MagicWells.jar">
       <element id="module-output" name="MagicWells" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/hsqldb/lib/hsqldb.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

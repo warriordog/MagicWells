@@ -8,12 +8,14 @@ public class Well {
     private final Location location;
     private UUID owner;
     private String name;
+    private int dbID;
 
     public Well(Location location, String name) {
-        this(location, name, null);
+        this(-1, location, name, null);
     }
 
-    public Well(Location location, String name, UUID owner) {
+    public Well(int dbID, Location location, String name, UUID owner) {
+        this.dbID = dbID;
         this.location = location;
         this.name = name;
         this.owner = owner;
@@ -21,5 +23,13 @@ public class Well {
 
     public boolean isIntact() {
         return true;
+    }
+
+    public int getDbID() {
+        return dbID;
+    }
+
+    public void setDbID(int dbID) {
+        this.dbID = dbID;
     }
 }
