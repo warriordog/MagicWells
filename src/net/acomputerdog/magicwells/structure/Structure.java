@@ -7,7 +7,9 @@ import org.bukkit.block.Block;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An optimized class for storing, generating, and comparing a structure
@@ -15,7 +17,7 @@ import java.util.*;
 public class Structure implements Iterable<StructBlock> {
     private final MWPopulator populator;
 
-    // the components of the structure stored in XZY order
+    // the components of the structure stored in X+ Z+ Y- order
     private final StructBlock[] components;
     private final int width; //x
     private final int height; //y
@@ -24,51 +26,76 @@ public class Structure implements Iterable<StructBlock> {
     public Structure(MWPopulator populator, BufferedReader reader) throws IOException {
         this.populator = populator;
 
-        List<StructBlock> blocks = new ArrayList<>();
-        Map<String, String> props = new HashMap<>();
-        while (reader.ready()) {
-            String line = reader.readLine().trim();
-            if (!line.isEmpty() && !line.startsWith("#")) {
-                int eq = line.indexOf('=');
-                // read a property
-                if (eq >= 0 && line.length() - eq >= 2) {
-                    String key = line.substring(0, eq);
-                    String val = line.substring(eq + 1);
-                    props.put(key, val);
-                    // read a block
-                } else {
-                    String[] parts = line.split(",");
-                    if (parts.length == 4) {
-                        try {
-                            int x = Integer.parseInt(parts[0]);
-                            int y = Integer.parseInt(parts[1]);
-                            int z = Integer.parseInt(parts[2]);
-                            Material mat = Material.getMaterial(parts[3]);
+        // ready() call reads in the line that is read as "first"
+        if (!reader.ready()) {
+            throw new IllegalArgumentException("Input file is empty.");
+        }
+        String first = reader.readLine();
+        String[] firstParts = first.split(",");
+        if (firstParts.length != 3) {
+            throw new IllegalArgumentException("Input file does not include dimensions.");
+        }
 
-                            if (mat != null) {
-                                // add the block
-                                blocks.add(new StructBlock(mat, x, y, z));
-                            } else {
-                                throw new IllegalArgumentException("Unknown material: " + line);
-                            }
-                        } catch (NumberFormatException e) {
-                            throw new IllegalArgumentException("Malformed coordinate: " + line);
+        try {
+            this.width = Integer.parseInt(firstParts[0]);
+            this.length = Integer.parseInt(firstParts[1]);
+            this.height = Integer.parseInt(firstParts[2]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Input file has non-integer dimensions.");
+        }
+
+        // YZX order for efficiency
+        String[][][] blocks = new String[height][length][width];
+        int y = 0; // read in normal order so it gets flipped below
+        int z = 0;
+
+        // read layers in Y Z X order
+        while (reader.ready()) {
+            // don't trim here, some lines may have spaces
+            String line = reader.readLine();
+            if (!line.isEmpty() && !line.startsWith("#")) {
+                // must be at the top, because last layer will end at -1
+                if (y >= height) {
+                    throw new IllegalArgumentException("Input file has too many layers.");
+                }
+
+                String[] lineParts = line.split(",");
+                if (lineParts.length != width) {
+                    System.out.printf("Wrong length: %d", lineParts.length);
+                    throw new IllegalArgumentException("Layer strip is wrong length: " + line);
+                }
+
+                // copy part of line to out array
+                System.arraycopy(lineParts, 0, blocks[y][z], 0, width);
+
+                // move to next layer strip
+                z++;
+
+                // if this is the last strip, then go to next layer
+                if (z >= length) {
+                    z = 0;
+                    y++;
+                }
+            }
+        }
+
+        List<StructBlock> structBlocks = new ArrayList<>();
+        for (int aY = height - 1; aY >= 0; aY--) {
+            for (int aZ = 0; aZ < length; aZ++) {
+                for (int aX = 0; aX < width; aX++) {
+                    String blockName = blocks[aY][aZ][aX].trim();
+                    // skip empty spaces
+                    if (!blockName.isEmpty() && !".".equals(blockName)) {
+                        Material mat = Material.getMaterial(blockName);
+                        if (mat == null) {
+                            throw new IllegalArgumentException("Unknown material: " + blockName);
                         }
-                    } else {
-                        throw new IllegalArgumentException("Malformed line: " + line);
+                        structBlocks.add(new StructBlock(mat, aX, aY, aZ));
                     }
                 }
             }
         }
-        this.components = blocks.toArray(new StructBlock[blocks.size()]);
-
-        try {
-            width = Integer.parseInt(props.get("width"));
-            height = Integer.parseInt(props.get("height"));
-            length = Integer.parseInt(props.get("length"));
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Malformed dimension.");
-        }
+        this.components = structBlocks.toArray(new StructBlock[structBlocks.size()]);
     }
 
     public StructBlock[] getComponents() {
