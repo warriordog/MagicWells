@@ -72,8 +72,10 @@ public class MWPopulator extends BlockPopulator {
             return false;
         }
 
+        // we can generate here
         Location loc = new Location(world, (chunk.getX() * 16) + x, y, (chunk.getZ() * 16) + z);
         manager.getWellStruct().generate(loc);
+        manager.getPlugin().getWellList().createWell(loc);
         return true;
     }
 

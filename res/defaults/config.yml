@@ -2,8 +2,8 @@
 
 # Database settings
 databse:
-  # If true, MW will use a MySQL database for storing well locations.  Database parameters must be specified below.
-  enabled: false
+  # If true, MW will connect to an external database for storing well locations.  Database parameters must be specified below.
+  external: false
   address: 127.0.0.1
   username: user
   password: pass

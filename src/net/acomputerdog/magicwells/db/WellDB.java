@@ -10,8 +10,9 @@ public interface WellDB {
     void setup(FileConfiguration config);
 
     void connect();
-
     void disconnect();
+
+    boolean isConnected();
 
     Well getWellByName(String name);
 

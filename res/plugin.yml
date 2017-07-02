@@ -21,6 +21,30 @@ permissions:
       magicwells.feature.port.home: true
       magicwells.feature.port.other: true
 
+  magicwells.command.*:
+    description: Use all MW commands
+    default: op
+    children:
+      magicwells.command.admin.*: true
+      magicwells.command.user.*: true
+
+  magicwells.command.admin.*:
+    description: Use all admin-related commands
+    default: op
+    children:
+      magicwells.command.mwreload: true
+      magicwells.command.mwlist: true
+      magicwells.command.mwport: true
+      magicwells.command.mwrecheck: true
+
+  magicwells.command.user.*:
+    description: Use all user-related commands
+    default: op
+    children:
+      magicwells.command.mwinfo: true
+      magicwells.command.mwrepair: true
+      magicwells.command.mwrename: true
+
   magicwells.feature.wish:
     description: Wish for treasure at a well
     default: true
@@ -52,6 +76,9 @@ permissions:
   magicwells.command.mwrepair:
     description: use /mwrepair
     default: true
+  magicwells.command.mwrename:
+    description: use /mwrename
+    default: true
 
 commands:
   mwreload:
@@ -82,5 +109,10 @@ commands:
   mwrepair:
     description: Reactivate a damaged well
     permission: magicwells.command.mwrepair
-    usage: /mwrepair [well_name]
+    usage: /mwrepair <well_name>
     aliases: [magicwellrepair]
+  mwrename:
+    description: Rename a well that you own
+    permission: magicwells.command.mwrename
+    usage: /mwrename <well_name> <new_name>
+    aliases: [magicwellrename]

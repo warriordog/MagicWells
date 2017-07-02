@@ -122,4 +122,8 @@ public class PluginMagicWells extends JavaPlugin {
     public StructureManager getStructureManager() {
         return structureManager;
     }
+
+    public WellList getWellList() {
+        return wellList;
+    }
 }
