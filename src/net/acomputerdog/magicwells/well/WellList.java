@@ -35,7 +35,9 @@ public class WellList {
         }
     }
 
-    public void createWell(Location loc) {
+    public Well createWell(Location loc) {
         Well well = new Well(loc, wellNamer.getRandomName());
+        db.createWell(well);
+        return well;
     }
 }

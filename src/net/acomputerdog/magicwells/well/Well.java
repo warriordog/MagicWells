@@ -32,4 +32,12 @@ public class Well {
     public void setDbID(int dbID) {
         this.dbID = dbID;
     }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
