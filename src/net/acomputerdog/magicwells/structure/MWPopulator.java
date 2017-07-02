@@ -60,7 +60,11 @@ public class MWPopulator extends BlockPopulator {
     private boolean tryGenWell(World world, Chunk chunk, int x, int y, int z) {
         // make sure that we do not generate through the bottom of the chunk
         if (y < manager.getWellStruct().getHeight()) {
-            //getStructureManager().getPlugin().getLogger().info("Source too low, cancelling.");
+            return false;
+        }
+
+        // make sure that we don't generate through top of chunk
+        if (y + manager.getWellStruct().getOffset() > 255) {
             return false;
         }
 

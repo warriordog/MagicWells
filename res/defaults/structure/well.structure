@@ -1,5 +1,5 @@
-5,5,8
-# ^ is width, length, height
+5,5,8,3
+# ^ is width, length, height, offset
 
 # Default well structure
 # a ' ' or '.' as material means not part of the structure

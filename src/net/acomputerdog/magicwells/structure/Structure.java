@@ -22,6 +22,7 @@ public class Structure implements Iterable<StructBlock> {
     private final int width; //x
     private final int height; //y
     private final int length; //z
+    private final int offset; //distance to move upwards before generating
 
     public Structure(MWPopulator populator, BufferedReader reader) throws IOException {
         this.populator = populator;
@@ -32,7 +33,7 @@ public class Structure implements Iterable<StructBlock> {
         }
         String first = reader.readLine();
         String[] firstParts = first.split(",");
-        if (firstParts.length != 3) {
+        if (firstParts.length != 4) {
             throw new IllegalArgumentException("Input file does not include dimensions.");
         }
 
@@ -40,6 +41,7 @@ public class Structure implements Iterable<StructBlock> {
             this.width = Integer.parseInt(firstParts[0]);
             this.length = Integer.parseInt(firstParts[1]);
             this.height = Integer.parseInt(firstParts[2]);
+            this.offset = Integer.parseInt(firstParts[3]);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Input file has non-integer dimensions.");
         }
@@ -122,7 +124,7 @@ public class Structure implements Iterable<StructBlock> {
         World w = l.getWorld();
         for (StructBlock sb : components) {
             // set the block
-            Block block = w.getBlockAt(l.getBlockX() + sb.getXOff(), l.getBlockY() - sb.getYOff(), l.getBlockZ() + sb.getZOff());
+            Block block = w.getBlockAt(l.getBlockX() + sb.getXOff(), l.getBlockY() - sb.getYOff() + offset, l.getBlockZ() + sb.getZOff());
             if (populator.canReplaceBlock(block)) {
                 block.setType(sb.getBlock());
             }
@@ -146,5 +148,9 @@ public class Structure implements Iterable<StructBlock> {
                 return next;
             }
         };
+    }
+
+    public int getOffset() {
+        return offset;
     }
 }
