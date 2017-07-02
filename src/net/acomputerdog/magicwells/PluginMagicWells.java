@@ -2,13 +2,17 @@ package net.acomputerdog.magicwells;
 
 import net.acomputerdog.magicwells.structure.StructureManager;
 import net.acomputerdog.magicwells.well.WellList;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
 
 public class PluginMagicWells extends JavaPlugin {
-    private StructureManager structureManager;
     private WellList wellList;
+    private StructureManager structureManager;
+    private MWEventHandler eventHandler;
+    private MWCommandHandler commandHandler;
 
     @Override
     public void onEnable() {
@@ -16,10 +20,26 @@ public class PluginMagicWells extends JavaPlugin {
             // create plugin directory and any missing config file
             setupPluginDir();
 
+            wellList = new WellList(this);
+            structureManager = new StructureManager(this);
+            eventHandler = new MWEventHandler(this);
+            commandHandler = new MWCommandHandler(this);
+
+            // load wells
+            wellList.connect();
+
+            // load structures
+            structureManager.load();
+
+            // register event handler
+            eventHandler.register();
         } catch (Exception e) {
             getLogger().severe("Unhandled error starting plugin.  MagicWells will be disabled.");
             e.printStackTrace();
+
+            onDisable();
             super.setEnabled(false);
+            getServer().getPluginManager().disablePlugin(this);
         }
     }
 
@@ -67,6 +87,28 @@ public class PluginMagicWells extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        try {
+            if (wellList != null) {
+                // disconnect from database
+                wellList.disconnect();
+                wellList = null;
+            }
 
+            structureManager = null;
+            eventHandler = null;
+            commandHandler = null;
+
+            // cancel any events from this plugin
+            getServer().getScheduler().cancelTasks(this);
+        } catch (Exception e) {
+            getLogger().warning("Unhandled exception while shutting down plugin.");
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        return commandHandler.onCommand(sender, command, label, args);
     }
 }

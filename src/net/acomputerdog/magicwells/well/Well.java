@@ -18,4 +18,8 @@ public class Well {
         this.name = name;
         this.owner = owner;
     }
+
+    public boolean isIntact() {
+
+    }
 }

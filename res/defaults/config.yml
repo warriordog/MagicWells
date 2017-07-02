@@ -8,3 +8,7 @@ databse:
   username: user
   password: pass
   table: magicwells
+
+# Chance of generating a well.
+# 1.0 is 1 well in every chunk
+well_gen_chance: 0.25f
