@@ -45,7 +45,7 @@ public class PluginMagicWells extends JavaPlugin {
 
     private void setupPluginDir() {
         // create dir
-        if (!getDataFolder().isDirectory() && !getDataFolder().mkdir()) {
+        if (!createDirectory(getDataFolder())) {
             getLogger().warning("Unable to create plugin data directory, do you have permission for this folder?");
         }
 
@@ -56,7 +56,14 @@ public class PluginMagicWells extends JavaPlugin {
         saveDefaultFile("syllables.lst");
 
         // create structure files
+        if (!createDirectory(new File(getDataFolder(), "structure"))) {
+            getLogger().warning("Unable to create structures folder, do you have permissions?");
+        }
         saveDefaultFile("structure/well.structure");
+    }
+
+    private boolean createDirectory(File path) {
+        return path.isDirectory() || path.mkdirs();
     }
 
     private void saveDefaultFile(String name) {

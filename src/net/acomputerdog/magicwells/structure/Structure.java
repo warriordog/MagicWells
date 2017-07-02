@@ -31,7 +31,7 @@ public class Structure implements Iterable<StructBlock> {
             if (!line.isEmpty() && !line.startsWith("#")) {
                 int eq = line.indexOf('=');
                 // read a property
-                if (eq >= 0 && line.length() - eq > 2) {
+                if (eq >= 0 && line.length() - eq >= 2) {
                     String key = line.substring(0, eq);
                     String val = line.substring(eq + 1);
                     props.put(key, val);
@@ -95,7 +95,7 @@ public class Structure implements Iterable<StructBlock> {
         World w = l.getWorld();
         for (StructBlock sb : components) {
             // set the block
-            Block block = w.getBlockAt(l.getBlockX() + sb.getXOff(), l.getBlockY() + sb.getYOff(), l.getBlockZ() + sb.getZOff());
+            Block block = w.getBlockAt(l.getBlockX() + sb.getXOff(), l.getBlockY() - sb.getYOff(), l.getBlockZ() + sb.getZOff());
             if (populator.canReplaceBlock(block)) {
                 block.setType(sb.getBlock());
             }

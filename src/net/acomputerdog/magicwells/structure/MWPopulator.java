@@ -14,12 +14,14 @@ import java.util.Set;
 public class MWPopulator extends BlockPopulator {
     private final StructureManager manager;
     private final float wellChance;
-    private final Structure wellStruct;
     private final Set<Material> avoidBlocks;
 
     public MWPopulator(StructureManager manager) {
         this.manager = manager;
         this.wellChance = (float) manager.getPlugin().getConfig().getDouble("well_gen_chance", 0.0d);
+        if (wellChance == 0.0d) {
+            getStructureManager().getPlugin().getLogger().info("Well generation is disabled.");
+        }
 
         this.avoidBlocks = new HashSet<>();
         for (String name : manager.getPlugin().getConfig().getStringList("gen_avoid_blocks")) {
@@ -30,8 +32,6 @@ public class MWPopulator extends BlockPopulator {
                 avoidBlocks.add(mat);
             }
         }
-
-        this.wellStruct = manager.getWellStruct();
     }
 
     public boolean canReplaceBlock(Block block) {
@@ -59,20 +59,21 @@ public class MWPopulator extends BlockPopulator {
 
     private boolean tryGenWell(World world, Chunk chunk, int x, int y, int z) {
         // make sure that we do not generate through the bottom of the chunk
-        if (y < wellStruct.getHeight()) {
+        if (y < manager.getWellStruct().getHeight()) {
+            //getStructureManager().getPlugin().getLogger().info("Source too low, cancelling.");
             return false;
         }
 
-        int uX = x + wellStruct.getWidth();
-        int uZ = z + wellStruct.getLength();
+        int endX = x + manager.getWellStruct().getWidth();
+        int endZ = z + manager.getWellStruct().getLength();
 
         //make sure that this well will not generate into a "corner" chunk that may not be loaded
-        if (uX > 15 && uZ > 15) {
+        if (endX > 15 && endZ > 15) {
             return false;
         }
 
-        Location loc = new Location(world, (chunk.getX() * 16) + x, y, (chunk.getZ()) + z);
-        wellStruct.generate(loc);
+        Location loc = new Location(world, (chunk.getX() * 16) + x, y, (chunk.getZ() * 16) + z);
+        manager.getWellStruct().generate(loc);
         return true;
     }
 
@@ -84,5 +85,9 @@ public class MWPopulator extends BlockPopulator {
             }
         }
         return -1;
+    }
+
+    public StructureManager getStructureManager() {
+        return manager;
     }
 }
