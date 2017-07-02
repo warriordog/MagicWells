@@ -63,7 +63,7 @@ public class PluginMagicWells extends JavaPlugin {
         File out = new File(getDataFolder(), name);
         if (!out.exists()) {
             getLogger().info("Extracting resource: " + name);
-            copyFile(out, getClass().getResourceAsStream("/".concat(name)));
+            copyFile(out, getClass().getResourceAsStream("/defaults/".concat(name)));
         }
     }
 
@@ -110,5 +110,9 @@ public class PluginMagicWells extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         return commandHandler.onCommand(sender, command, label, args);
+    }
+
+    public StructureManager getStructureManager() {
+        return structureManager;
     }
 }

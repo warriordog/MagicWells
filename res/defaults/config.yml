@@ -12,3 +12,9 @@ databse:
 # Chance of generating a well.
 # 1.0 is 1 well in every chunk
 well_gen_chance: 0.25f
+
+# Blocks to avoid when generating
+gen_avoid_blocks: [CHEST, END_GATEWAY]
+
+# Percent of blocks that are already missing from a newly generated well
+well_gen_damage: 0.0f

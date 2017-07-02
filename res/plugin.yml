@@ -3,6 +3,7 @@ version: 0.0.0
 description: Adds magic wells
 author: acomputerdog
 main: net.acomputerdog.magicwells.PluginMagicWells
+load: startup
 
 permissions:
   magicwells.feature.*:

@@ -20,6 +20,6 @@ public class Well {
     }
 
     public boolean isIntact() {
-
+        return true;
     }
 }
