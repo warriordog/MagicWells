@@ -83,7 +83,7 @@ public class MWEventHandler implements Listener {
         } else if (well.getOwner().equals(p.getUniqueId())) {
             p.sendMessage(ChatColor.AQUA + "This is your well, " + ChatColor.YELLOW + well.getName() + ChatColor.AQUA + ".");
         } else {
-            p.sendMessage(ChatColor.RED + "The water around you churns and tries to drag you down.  This well belongs to someone else!");
+            p.sendMessage(ChatColor.RED + "The water around you swirls and tries to drag you down.  This well belongs to someone else!");
         }
     }
 
