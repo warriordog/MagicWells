@@ -1,5 +1,5 @@
 name: MagicWells
-version: 0.0.0
+version: 1.0.0
 description: Adds magic wells
 author: acomputerdog
 main: net.acomputerdog.magicwells.PluginMagicWells
