@@ -1,8 +1,10 @@
 package net.acomputerdog.magicwells;
 
+import net.acomputerdog.magicwells.well.Well;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class MWCommandHandler {
     private final PluginMagicWells plugin;
@@ -77,7 +79,37 @@ public class MWCommandHandler {
 
     private void handleInfo(CommandSender sender, String[] args) {
         if (checkPerms(sender, "mwinfo")) {
-            sendYellow(sender, "Sorry, that command is not implemented.");
+            if (sender instanceof Player) {
+                Player p = (Player) sender;
+
+                // get wells
+                Well[] wells;
+                if (args.length == 1) {
+                    String wellName = args[0];
+                    wells = plugin.getWellList().getWellsByOwnerAndName(p.getUniqueId(), wellName);
+                } else {
+                    wells = plugin.getWellList().getWellsByOwner(p.getUniqueId());
+                }
+
+                // display info
+                sendYellow(p, "Your wells:");
+                for (Well well : wells) {
+                    StringBuilder m = new StringBuilder();
+                    m.append(well.getName());
+                    m.append(" - ID");
+                    m.append(well.getDbID());
+                    m.append(" - ");
+                    m.append(well.getLocation().getBlockX());
+                    m.append(", ");
+                    m.append(well.getLocation().getBlockY());
+                    m.append(", ");
+                    m.append(well.getLocation().getBlockZ());
+
+                    sendAqua(p, m.toString());
+                }
+            } else {
+                sendRed(sender, "This command can only be used by a player.");
+            }
         }
     }
 

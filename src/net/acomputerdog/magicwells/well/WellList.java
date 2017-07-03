@@ -6,6 +6,8 @@ import net.acomputerdog.magicwells.db.WellDB;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.util.UUID;
+
 public class WellList {
     private final PluginMagicWells plugin;
     private final WellNamer wellNamer;
@@ -66,5 +68,13 @@ public class WellList {
 
     public void saveWellOwner(Well well) {
         db.saveWellOwner(well.getDbID(), well.getOwner());
+    }
+
+    public Well[] getWellsByOwnerAndName(UUID owner, String name) {
+        return db.getWellsByOwnerAndName(owner, name);
+    }
+
+    public Well[] getWellsByOwner(UUID owner) {
+        return db.getWellsByOwner(owner);
     }
 }

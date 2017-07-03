@@ -7,6 +7,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 public class InternalDB implements WellDB {
@@ -22,6 +24,8 @@ public class InternalDB implements WellDB {
     private PreparedStatement getWellFromTrigger;
     private PreparedStatement getWellsInArea;
     private PreparedStatement getWellFromBBStatement;
+    private PreparedStatement getWellsFromOwner;
+    private PreparedStatement getWellsFromOwnerAndName;
 
     private PreparedStatement getWellNameStatement;
     private PreparedStatement insertWellNameStatement;
@@ -95,6 +99,9 @@ public class InternalDB implements WellDB {
 
             getWellBB1Statement = connection.prepareStatement("SELECT worldName, x1, y1, z1 FROM WellBBs WHERE wellID = ?");
             getWellBB2Statement = connection.prepareStatement("SELECT worldName, x2, y2, z2 FROM WellBBs WHERE wellID = ?");
+
+            getWellsFromOwner = connection.prepareStatement("SELECT wellID FROM WellOwners WHERE ownerUUID = ?");
+            getWellsFromOwnerAndName = connection.prepareStatement("SELECT WellOwners.wellID FROM WellOwners INNER JOIN WellNames ON WellOwners.wellID = WellNames.wellID WHERE WellOwners.ownerUUID = ? AND wellNames.wellName LIKE ?");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("HSQLDB is missing from the jar!  Please add it or use an external database.", e);
         } catch (SQLException e) {
@@ -350,6 +357,53 @@ public class InternalDB implements WellDB {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Unable to save well owner.", e);
+        }
+    }
+
+    @Override
+    public Well[] getWellsByOwnerAndName(UUID owner, String name) {
+        try {
+            getWellsFromOwnerAndName.setString(1, owner.toString());
+            getWellsFromOwnerAndName.setString(2, name);
+
+            List<Integer> wellIDs = new LinkedList<>();
+            ResultSet res = getWellsFromOwnerAndName.executeQuery();
+            while (res.next()) {
+                wellIDs.add(res.getInt(1));
+            }
+
+            Well[] wells = new Well[wellIDs.size()];
+            int i = 0;
+            for (int id : wellIDs) {
+                wells[i] = getWellByID(id);
+                i++;
+            }
+            return wells;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to look up wells by owner and name.", e);
+        }
+    }
+
+    @Override
+    public Well[] getWellsByOwner(UUID owner) {
+        try {
+            getWellsFromOwner.setString(1, owner.toString());
+
+            List<Integer> wellIDs = new LinkedList<>();
+            ResultSet res = getWellsFromOwner.executeQuery();
+            while (res.next()) {
+                wellIDs.add(res.getInt(1));
+            }
+
+            Well[] wells = new Well[wellIDs.size()];
+            int i = 0;
+            for (int id : wellIDs) {
+                wells[i] = getWellByID(id);
+                i++;
+            }
+            return wells;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to look up wells by owner.", e);
         }
     }
 

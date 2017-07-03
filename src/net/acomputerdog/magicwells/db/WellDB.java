@@ -31,4 +31,8 @@ public interface WellDB {
     Well getWellFromBB(Location l);
 
     void saveWellOwner(int wellID, UUID id);
+
+    Well[] getWellsByOwnerAndName(UUID owner, String name);
+
+    Well[] getWellsByOwner(UUID owner);
 }
