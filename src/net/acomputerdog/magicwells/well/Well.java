@@ -40,4 +40,12 @@ public class Well {
     public String getName() {
         return name;
     }
+
+    public UUID getOwner() {
+        return owner;
+    }
+
+    public void setOwner(UUID owner) {
+        this.owner = owner;
+    }
 }

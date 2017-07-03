@@ -69,7 +69,7 @@ class StructBlock {
      * @param block The block to check
      * @return return true if the block matches, false otherwise
      */
-    public boolean matches(Location root, Block block) {
+    public boolean blockMatches(Location root, Block block) {
         if (block == null) {
             return false;
         }

@@ -1,5 +1,7 @@
 5,5,8,3
-# ^ is width, length, height, offset
+GLOWSTONE
+# ^ trigger block - can only be one in the structure
+# ^^ is width, length, height, offset
 
 # Default well structure
 # a ' ' or '.' as material means not part of the structure

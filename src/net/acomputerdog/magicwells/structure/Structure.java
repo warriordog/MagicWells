@@ -24,6 +24,12 @@ public class Structure implements Iterable<StructBlock> {
     private final int length; //z
     private final int offset; //distance to move upwards before generating
 
+    private final Material triggerBlock; //trigger block for this structure
+    private final int triggerOffX;
+    private final int triggerOffY;
+    private final int triggerOffZ;
+
+    //TODO clean this up and split into different methods or a different class
     public Structure(MWPopulator populator, BufferedReader reader) throws IOException {
         this.populator = populator;
 
@@ -45,6 +51,16 @@ public class Structure implements Iterable<StructBlock> {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Input file has non-integer dimensions.");
         }
+
+        if (!reader.ready()) {
+            throw new IllegalArgumentException("Input file is cut short.");
+        }
+        String second = reader.readLine().trim();
+        Material triggerMat = Material.getMaterial(second);
+        if (triggerMat == null) {
+            throw new IllegalArgumentException("Trigger block is unknown");
+        }
+        this.triggerBlock = triggerMat;
 
         // YZX order for efficiency
         String[][][] blocks = new String[height][length][width];
@@ -81,6 +97,12 @@ public class Structure implements Iterable<StructBlock> {
             }
         }
 
+        // can't assign a final in a loop
+        int tOffX = 0;
+        int tOffY = 0;
+        int tOffZ = 0;
+        boolean triggerFound = false;
+
         List<StructBlock> structBlocks = new ArrayList<>();
         for (int aY = height - 1; aY >= 0; aY--) {
             for (int aZ = 0; aZ < length; aZ++) {
@@ -92,12 +114,29 @@ public class Structure implements Iterable<StructBlock> {
                         if (mat == null) {
                             throw new IllegalArgumentException("Unknown material: " + blockName);
                         }
+                        if (mat == triggerBlock) {
+                            if (!triggerFound) {
+                                tOffX = aX;
+                                tOffY = aY;
+                                tOffZ = aZ;
+                                triggerFound = true;
+                            } else {
+                                throw new IllegalArgumentException("Input structure has multiple trigger blocks.");
+                            }
+                        }
                         structBlocks.add(new StructBlock(mat, aX, aY, aZ));
                     }
                 }
             }
         }
         this.components = structBlocks.toArray(new StructBlock[structBlocks.size()]);
+
+        if (!triggerFound) {
+            throw new IllegalArgumentException("Input structure has not trigger block.");
+        }
+        this.triggerOffX = tOffX;
+        this.triggerOffY = tOffY;
+        this.triggerOffZ = tOffZ;
     }
 
     public StructBlock[] getComponents() {
@@ -152,5 +191,35 @@ public class Structure implements Iterable<StructBlock> {
 
     public int getOffset() {
         return offset;
+    }
+
+    public Material getTriggerBlock() {
+        return triggerBlock;
+    }
+
+    public int getTriggerOffX() {
+        return triggerOffX;
+    }
+
+    public int getTriggerOffY() {
+        return triggerOffY + offset;
+    }
+
+    public int getTriggerOffZ() {
+        return triggerOffZ;
+    }
+
+    public boolean isAtLocation(Location l) {
+        if (l.getWorld() == null) {
+            throw new IllegalArgumentException("Location must include a world");
+        }
+
+        for (StructBlock block : components) {
+            if (!block.blockMatches(l, l.getWorld().getBlockAt(l))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

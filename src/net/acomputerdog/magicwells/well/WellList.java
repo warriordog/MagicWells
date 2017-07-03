@@ -40,4 +40,12 @@ public class WellList {
         db.createWell(well);
         return well;
     }
+
+    public int getIDByTrigger(Location loc) {
+        return db.getWellFromTrigger(loc);
+    }
+
+    public Well getWellByID(int id) {
+        return db.getWellByID(id);
+    }
 }
