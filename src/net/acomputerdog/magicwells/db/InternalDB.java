@@ -45,6 +45,11 @@ public class InternalDB implements WellDB {
     private PreparedStatement getWellBB2Statement;
 
     private PreparedStatement numWellBBsInArea;
+
+    private PreparedStatement insertHomeWellStatement;
+    private PreparedStatement updateHomeWellStatement;
+    private PreparedStatement getHomeWellStatement;
+
     public InternalDB(PluginMagicWells plugin) {
         this.plugin = plugin;
     }
@@ -106,6 +111,12 @@ public class InternalDB implements WellDB {
 
             //X1 X2 X1 X2 Z1 Z2 Z1 Z2
             numWellBBsInArea = connection.prepareStatement("SELECT COUNT(DISTINCT wellID) FROM WellBBs WHERE ((x1 >= ? AND x1 <= ?) OR (x2 >= ? AND x2 >= ?)) AND ((z1 >= ? AND z1 <= ?) OR (z2 >= ? AND z2 >= ?))");
+
+            insertHomeWellStatement = connection.prepareStatement("INSERT INTO WellHomes(ownerUUID, wellID) VALUES(?, ?)");
+            // backwards, wellID then ownerUUID
+            updateHomeWellStatement = connection.prepareStatement("UPDATE WellHomes SET wellID = ? WHERE ownerUUID = ?");
+            getHomeWellStatement = connection.prepareStatement("SELECT wellID FROM WellHomes WHERE ownerUUID = ?");
+
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("HSQLDB is missing from the jar!  Please add it or use an external database.", e);
         } catch (SQLException e) {
@@ -128,6 +139,7 @@ public class InternalDB implements WellDB {
             execUpdate("CREATE TABLE IF NOT EXISTS WellOwners (wellID INTEGER NOT NULL, ownerUUID CHAR(36) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
             execUpdate("CREATE TABLE IF NOT EXISTS WellTriggers (wellID INTEGER NOT NULL, worldName VARCHAR(100), offX INTEGER NOT NULL, offY INTEGER NOT NULL, offZ INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
             execUpdate("CREATE TABLE IF NOT EXISTS WellBBs (wellID INTEGER NOT NULL, worldName VARCHAR(100), x1 INTEGER NOT NULL, y1 INTEGER NOT NULL, z1 INTEGER NOT NULL, x2 INTEGER NOT NULL, y2 INTEGER NOT NULL, z2 INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            execUpdate("CREATE TABLE IF NOT EXISTS WellHomes (ownerUUID CHAR(36), wellID INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
         } catch (SQLException e) {
             throw new RuntimeException("SQL error while verifying database", e);
         }
@@ -430,6 +442,44 @@ public class InternalDB implements WellDB {
             return res.getInt(1);
         } catch (SQLException e) {
             throw new RuntimeException("Unable to count wells in area.", e);
+        }
+    }
+
+    @Override
+    public Well getHomeWell(UUID owner) {
+        try {
+            getHomeWellStatement.setString(1, owner.toString());
+
+            ResultSet res = getHomeWellStatement.executeQuery();
+            if (!res.next()) {
+                throw new RuntimeException("Error getting home well");
+            }
+            return getWellByID(res.getInt(1));
+        } catch (SQLException e) {
+            throw new RuntimeException("Exception getting home well", e);
+        }
+    }
+
+    @Override
+    public void setHomeWell(UUID owner, Well homeWell) {
+        try {
+            // this one is backwards
+            updateHomeWellStatement.setInt(1, homeWell.getDbID());
+            updateHomeWellStatement.setString(2, owner.toString());
+
+            int result = updateHomeWellStatement.executeUpdate();
+            if (result < 0) {
+                throw new RuntimeException("Error updating home well.");
+            } else if (result == 0) {
+                insertHomeWellStatement.setString(1, owner.toString());
+                insertHomeWellStatement.setInt(2, homeWell.getDbID());
+
+                if (insertHomeWellStatement.executeUpdate() < 0) {
+                    throw new RuntimeException("Error inserting home well.");
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to save home well.", e);
         }
     }
 

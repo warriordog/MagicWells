@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -21,6 +22,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 public class MWEventHandler implements Listener {
     private static final String PLAYER_WELL_NEARBY_KEY = "magicwells.player_well_nearby";
     private static final String PLAYER_IN_WELL_KEY = "magicwells.player_in_well";
+    private static final String ITEM_IS_HOME_KEY = "magicwells.item_is_home";
 
     private final PluginMagicWells plugin;
 
@@ -147,5 +149,25 @@ public class MWEventHandler implements Listener {
         }
     }
 
-
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemDrop(PlayerDropItemEvent e) {
+        // make sure player is in well
+        if (e.getPlayer().hasMetadata(PLAYER_IN_WELL_KEY)) {
+            if (e.getItemDrop().getItemStack().getType() == plugin.getHomeItem()) {
+                if (e.getPlayer().hasPermission("magicwells.feature.port.home")) {
+                    Well homeWell = plugin.getWellList().getHomeWell(e.getPlayer().getUniqueId());
+                    if (homeWell == null) {
+                        e.getPlayer().sendMessage(ChatColor.RED + "You do not have a home well, set it using /mwsethome.");
+                    } else {
+                        e.getPlayer().sendMessage(ChatColor.AQUA + "The water suddenly rushes downwards, dragging you away!");
+                        Location target = new Location(homeWell.getLocation().getWorld(), homeWell.getLocation().getBlockX(), homeWell.getLocation().getBlockY() + 1, homeWell.getLocation().getBlockZ());
+                        e.getPlayer().teleport(target); // place on corner
+                        //TODO offset
+                    }
+                } else {
+                    e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport home.");
+                }
+            }
+        }
+    }
 }

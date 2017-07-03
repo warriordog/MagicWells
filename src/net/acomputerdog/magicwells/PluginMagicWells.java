@@ -2,6 +2,7 @@ package net.acomputerdog.magicwells;
 
 import net.acomputerdog.magicwells.structure.StructureManager;
 import net.acomputerdog.magicwells.well.WellList;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,11 +15,18 @@ public class PluginMagicWells extends JavaPlugin {
     private MWEventHandler eventHandler;
     private MWCommandHandler commandHandler;
 
+    private Material homeItem;
+
     @Override
     public void onEnable() {
         try {
             // create plugin directory and any missing config file
             setupPluginDir();
+
+            homeItem = Material.getMaterial(getConfig().getString("home_well_item"));
+            if (homeItem == null) {
+                getLogger().warning("Unrecognised home item material.");
+            }
 
             wellList = new WellList(this);
             structureManager = new StructureManager(this);
@@ -125,5 +133,9 @@ public class PluginMagicWells extends JavaPlugin {
 
     public WellList getWellList() {
         return wellList;
+    }
+
+    public Material getHomeItem() {
+        return homeItem;
     }
 }

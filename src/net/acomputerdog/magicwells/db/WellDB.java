@@ -37,4 +37,8 @@ public interface WellDB {
     Well[] getWellsByOwner(UUID owner);
 
     int numWellBBsInRange(int x1, int z1, int x2, int z2);
+
+    Well getHomeWell(UUID owner);
+
+    void setHomeWell(UUID owner, Well homeWell);
 }

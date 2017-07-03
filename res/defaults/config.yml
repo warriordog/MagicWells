@@ -1,6 +1,7 @@
 # MagicWells config file
 
 # Database settings
+# THIS IS NOT YET IMPLEMENTED, PLEASE LEAVE 'EXTERNAL' SET TO FALSE
 databse:
   # If true, MW will connect to an external database for storing well locations.  Database parameters must be specified below.
   external: false
@@ -18,3 +19,6 @@ gen_avoid_blocks: [CHEST, END_GATEWAY]
 
 # Percent of blocks that are already missing from a newly generated well
 well_gen_damage: 0.0
+
+# Item to be thrown to teleport
+home_well_item: REDSTONE

@@ -36,6 +36,9 @@ public class MWCommandHandler {
             case "mwrename":
                 handleRename(sender, args);
                 break;
+            case "mwsethome":
+                handleSethome(sender, args);
+                break;
             default:
                 sendRed(sender, "Internal error: that command was not recognised by MagicWells.  Please report this!");
         }
@@ -122,6 +125,48 @@ public class MWCommandHandler {
     private void handleRename(CommandSender sender, String[] args) {
         if (checkPerms(sender, "mwrename")) {
             sendYellow(sender, "Sorry, that command is not implemented.");
+        }
+    }
+
+    private void handleSethome(CommandSender sender, String[] args) {
+        if (checkPerms(sender, "mwsethome")) {
+            if (sender instanceof Player) {
+                Player p = (Player) sender;
+                if (args.length == 1) {
+
+                    Well well;
+                    try {
+                        int id = Integer.parseInt(args[0]);
+                        well = plugin.getWellList().getWellByID(id);
+                    } catch (NumberFormatException e) {
+                        Well[] wells = plugin.getWellList().getWellsByOwnerAndName(p.getUniqueId(), args[0]);
+                        if (wells.length == 0) {
+                            well = null;
+                        } else {
+                            if (wells.length > 1) {
+                                sendRed(p, "Multiple wells matched that name, the first will be selected.");
+                            }
+
+                            well = wells[0];
+                        }
+                    }
+
+                    if (well != null) {
+                        if (p.getUniqueId().equals(well.getOwner())) {
+                            plugin.getWellList().setHomeWell(p.getUniqueId(), well);
+                            p.sendMessage(ChatColor.AQUA + "Your home well is now " + ChatColor.YELLOW + well.getName() + ChatColor.AQUA + ".");
+                        } else {
+                            sendRed(sender, "You are not the owner of that well.");
+                        }
+                    } else {
+                        sendRed(sender, "No well could be found by that name or id.");
+                    }
+                } else {
+                    sendRed(sender, "You must specify the well name or ID to use as home.");
+                }
+            } else {
+                sendRed(sender, "This command can only be used by a player.");
+            }
         }
     }
 

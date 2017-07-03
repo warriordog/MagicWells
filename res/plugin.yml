@@ -44,6 +44,7 @@ permissions:
       magicwells.command.mwinfo: true
       magicwells.command.mwrepair: true
       magicwells.command.mwrename: true
+      magicwells.command.mwsethome: true
 
   magicwells.feature.wish:
     description: Wish for treasure at a well
@@ -78,6 +79,9 @@ permissions:
     default: true
   magicwells.command.mwrename:
     description: use /mwrename
+    default: true
+  magicwells.command.mwsethome:
+    description: use /mwsethome
     default: true
 
 commands:
@@ -116,3 +120,8 @@ commands:
     permission: magicwells.command.mwrename
     usage: /mwrename <well_name> <new_name>
     aliases: [magicwellrename]
+  mwsethome:
+    description: Sets your home well
+    permission: magicwells.command.mwsethome
+    usage: /mwsethome <well_name>
+    aliases: [magicwellsethome]

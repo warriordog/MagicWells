@@ -77,4 +77,12 @@ public class WellList {
     public Well[] getWellsByOwner(UUID owner) {
         return db.getWellsByOwner(owner);
     }
+
+    public Well getHomeWell(UUID owner) {
+        return db.getHomeWell(owner);
+    }
+
+    public void setHomeWell(UUID owner, Well homeWell) {
+        db.setHomeWell(owner, homeWell);
+    }
 }
