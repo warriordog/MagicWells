@@ -8,13 +8,12 @@ import org.bukkit.block.Block;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * An optimized class for storing, generating, and comparing a structure
  */
-public class Structure implements Iterable<StructBlock> {
+public class Structure {
     private final MWPopulator populator;
 
     // the components of the structure stored in X+ Z+ Y- order
@@ -32,9 +31,6 @@ public class Structure implements Iterable<StructBlock> {
 
     // bounding box
     private final int bbX1, bbY1, bbZ1, bbX2, bbY2, bbZ2;
-
-    // shared Location instance
-    private final Location tempLocation = new Location(null, 0, 0, 0);
 
     //This is a huge constructor, but it has to be like this because fields are final and cannot
     //  be set from other methods
@@ -185,25 +181,6 @@ public class Structure implements Iterable<StructBlock> {
         }
     }
 
-    @Override
-    public Iterator<StructBlock> iterator() {
-        return new Iterator<StructBlock>() {
-            private int i = 0;
-
-            @Override
-            public boolean hasNext() {
-                return i < components.length;
-            }
-
-            @Override
-            public StructBlock next() {
-                StructBlock next = components[i];
-                i++;
-                return next;
-            }
-        };
-    }
-
     public int getOffset() {
         return offset;
     }
@@ -232,10 +209,6 @@ public class Structure implements Iterable<StructBlock> {
         return new Location(null, bbX2, bbY2, bbZ2);
     }
 
-    public StructBlock[] getComponents() {
-        return components;
-    }
-
     public int getWidth() {
         return width;
     }
@@ -246,15 +219,5 @@ public class Structure implements Iterable<StructBlock> {
 
     public int getLength() {
         return length;
-    }
-
-    /*
-        Calculates the offset of "loc" from "root" and stores it in "out"
-     */
-    private static void calcLocalOffset(Location root, Location loc, Location out) {
-        out.setWorld(root.getWorld());
-        out.setX(loc.getBlockX() - root.getBlockX());
-        out.setY(loc.getBlockY() - root.getBlockY());
-        out.setZ(loc.getBlockZ() - root.getBlockZ());
     }
 }

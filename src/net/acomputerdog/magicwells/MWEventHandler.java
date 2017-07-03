@@ -22,7 +22,6 @@ public class MWEventHandler implements Listener {
     private static final String PLAYER_IN_WELL_KEY = "magicwells.player_in_well";
 
     private final PluginMagicWells plugin;
-
     private final Location tempLocation = new Location(null, 0, 0, 0);
 
     public MWEventHandler(PluginMagicWells plugin) {
@@ -87,7 +86,7 @@ public class MWEventHandler implements Listener {
         }
     }
 
-    private void checkChunks(Chunk c, Player p) {
+    private void checkIfWellInChunk(Chunk c, Player p) {
         if (plugin.getWellList().isWellInChunk(c)) {
             p.setMetadata(PLAYER_WELL_NEARBY_KEY, new FixedMetadataValue(plugin, true));
         } else {
@@ -199,14 +198,14 @@ public class MWEventHandler implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerLogin(PlayerJoinEvent e) {
-        checkChunks(e.getPlayer().getLocation().getChunk(), e.getPlayer());
+        checkIfWellInChunk(e.getPlayer().getLocation().getChunk(), e.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent e) {
         // TODO check for wells that overlap into this chunk (from another)
         if (e.getTo().getChunk() != e.getFrom().getChunk()) {
-            checkChunks(e.getTo().getChunk(), e.getPlayer());
+            checkIfWellInChunk(e.getTo().getChunk(), e.getPlayer());
         }
 
         if (e.getTo().getBlockX() != e.getFrom().getBlockX() || e.getTo().getBlockY() != e.getFrom().getBlockY() || e.getTo().getBlockZ() != e.getFrom().getBlockZ()) {

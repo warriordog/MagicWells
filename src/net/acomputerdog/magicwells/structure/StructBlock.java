@@ -1,13 +1,8 @@
 package net.acomputerdog.magicwells.structure;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 
 class StructBlock {
-    // temporary shared location instance used to avoid allocating too many objects
-    private static final Location tempLocation = new Location(null, 0, 0, 0);
-
     private final Material block;
     private final int xOff;
     private final int yOff;
@@ -18,41 +13,6 @@ class StructBlock {
         this.xOff = xOff;
         this.yOff = yOff;
         this.zOff = zOff;
-    }
-
-    /**
-     * Checks if a block matches this component as a part of the structure at the specified location
-     *
-     * @param root  The location of the structure to use as a base
-     * @param block The block to check
-     * @return return true if the block matches, false otherwise
-     */
-    public boolean blockMatches(Location root, Block block) {
-        if (block == null) {
-            return false;
-        }
-        if (block.getType() != this.block) {
-            return false;
-        }
-
-        block.getLocation(tempLocation);
-
-        int blockX = calcOff(root.getBlockX(), tempLocation.getBlockX());
-        if (blockX != xOff) {
-            return false;
-        }
-
-        int blockY = calcOff(root.getBlockY(), tempLocation.getBlockY());
-        if (blockY != yOff) {
-            return false;
-        }
-
-        int blockZ = calcOff(root.getBlockZ(), tempLocation.getBlockZ());
-        if (blockZ != zOff) {
-            return false;
-        }
-
-        return true;
     }
 
     public Material getBlock() {
@@ -69,12 +29,5 @@ class StructBlock {
 
     public int getZOff() {
         return zOff;
-    }
-
-    /**
-     * Calculates the local offset of a position from a root position
-     */
-    private static int calcOff(int root, int loc) {
-        return loc - root;
     }
 }

@@ -28,19 +28,8 @@ public class PluginMagicWells extends JavaPlugin {
             // create plugin directory and any missing config file
             setupPluginDir();
 
-            homeItem = Material.getMaterial(getConfig().getString("well_item_warp_home"));
-            if (homeItem == null) {
-                getLogger().warning("Unrecognised item material.");
-            }
-            warpItem = Material.getMaterial(getConfig().getString("well_item_warp_other"));
-            if (warpItem == null) {
-                getLogger().warning("Unrecognised item material.");
-            }
-            randomItem = Material.getMaterial(getConfig().getString("well_item_warp_random"));
-            if (randomItem == null) {
-                getLogger().warning("Unrecognised item material.");
-            }
-            allowedWorlds = getConfig().getStringList("world_names");
+            // read in config settings
+            readConfig();
 
             wellList = new WellList(this);
             structureManager = new StructureManager(this);
@@ -82,6 +71,22 @@ public class PluginMagicWells extends JavaPlugin {
             getLogger().warning("Unable to create structures folder, do you have permissions?");
         }
         saveDefaultFile("structure/well.structure");
+    }
+
+    private void readConfig() {
+        homeItem = Material.getMaterial(getConfig().getString("well_item_warp_home"));
+        if (homeItem == null) {
+            getLogger().warning("Unrecognised item material.");
+        }
+        warpItem = Material.getMaterial(getConfig().getString("well_item_warp_other"));
+        if (warpItem == null) {
+            getLogger().warning("Unrecognised item material.");
+        }
+        randomItem = Material.getMaterial(getConfig().getString("well_item_warp_random"));
+        if (randomItem == null) {
+            getLogger().warning("Unrecognised item material.");
+        }
+        allowedWorlds = getConfig().getStringList("world_names");
     }
 
     private boolean createDirectory(File path) {
