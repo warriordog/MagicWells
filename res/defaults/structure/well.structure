@@ -8,19 +8,19 @@ GLOWSTONE
 # Default well structure
 # a ' ' or '.' as material means not part of the structure
 
-.,.,.,.,.
+AIR,.,.,.,.
 .,.,.,.,.
 FENCE,FENCE,GLOWSTONE,FENCE,FENCE
 .,.,.,.,.
 .,.,.,.,.
 
-.,.,.,.,.
+AIR,.,.,.,.
 .,.,.,.,.
 FENCE,.,.,.,FENCE
 .,.,.,.,.
 .,.,.,.,.
 
-.,.,.,.,.
+AIR,.,.,.,.
 .,.,.,.,.
 FENCE,.,.,.,FENCE
 .,.,.,.,.

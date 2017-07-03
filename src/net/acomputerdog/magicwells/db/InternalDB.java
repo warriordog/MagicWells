@@ -50,6 +50,8 @@ public class InternalDB implements WellDB {
     private PreparedStatement updateHomeWellStatement;
     private PreparedStatement getHomeWellStatement;
 
+    private PreparedStatement getNumberOfWellsStatement;
+
     public InternalDB(PluginMagicWells plugin) {
         this.plugin = plugin;
     }
@@ -117,6 +119,8 @@ public class InternalDB implements WellDB {
             updateHomeWellStatement = connection.prepareStatement("UPDATE WellHomes SET wellID = ? WHERE ownerUUID = ?");
             getHomeWellStatement = connection.prepareStatement("SELECT wellID FROM WellHomes WHERE ownerUUID = ?");
 
+            // no need for DISTINCT because wellID is the primary key
+            getNumberOfWellsStatement = connection.prepareStatement("SELECT COUNT(wellID) FROM Wells");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("HSQLDB is missing from the jar!  Please add it or use an external database.", e);
         } catch (SQLException e) {
@@ -482,6 +486,21 @@ public class InternalDB implements WellDB {
             throw new RuntimeException("Unable to save home well.", e);
         }
     }
+
+    @Override
+    public int getNumberOfWells() {
+        try {
+            ResultSet res = getNumberOfWellsStatement.executeQuery();
+
+            if (!res.next()) {
+                throw new RuntimeException("Unable to get number of wells");
+            }
+            return res.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to get number of wells.", e);
+        }
+    }
+
 
     private Location getWellBB1(int wellID) {
         try {

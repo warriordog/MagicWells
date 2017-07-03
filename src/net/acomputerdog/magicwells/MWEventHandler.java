@@ -20,7 +20,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 public class MWEventHandler implements Listener {
     private static final String PLAYER_WELL_NEARBY_KEY = "magicwells.player_well_nearby";
     private static final String PLAYER_IN_WELL_KEY = "magicwells.player_in_well";
-    private static final String ITEM_IS_HOME_KEY = "magicwells.item_is_home";
 
     private final PluginMagicWells plugin;
 
@@ -105,6 +104,7 @@ public class MWEventHandler implements Listener {
         tempLocation.setY(wellLoc.getBlockY() + 1); // place on top of corner
         tempLocation.setZ(wellLoc.getBlockZ());
         p.teleport(tempLocation);
+        p.removeMetadata(PLAYER_IN_WELL_KEY, plugin);
         //TODO offset
     }
 
@@ -152,13 +152,24 @@ public class MWEventHandler implements Listener {
                     e.getPlayer().sendMessage(ChatColor.RED + "The water churns, and your item floats back to the surface.  Make sure you wrote the correct name or well ID.");
                     e.setCancelled(true);
                 }
-                // teleport to random place
-            } else {
-                e.getPlayer().sendMessage("Warping to a random place is not yet implemented.");
-                e.setCancelled(true);
             }
         } else {
             e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport to other wells.");
+            e.setCancelled(true);
+        }
+    }
+
+    private void handleWarpRandom(PlayerDropItemEvent e) {
+        if (e.getPlayer().hasPermission("magicwells.feature.port.random")) {
+            Well well = plugin.getWellList().getRandomWell();
+            if (well.getOwner() == null || well.getOwner().equals(e.getPlayer().getUniqueId())) {
+                teleportToWell(e.getPlayer(), well);
+            } else {
+                e.getPlayer().sendMessage(ChatColor.RED + "The water splashes and froths before quieting down.  The target well is not yours!");
+                e.setCancelled(true);
+            }
+        } else {
+            e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport to random wells.");
             e.setCancelled(true);
         }
     }
@@ -180,8 +191,10 @@ public class MWEventHandler implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onWorldLoad(WorldInitEvent e) {
         // load world generator
-        plugin.getLogger().info("Injecting into world.");
-        plugin.getStructureManager().injectPopulator(e.getWorld());
+        if (plugin.getAllowedWorlds().contains(e.getWorld().getName())) {
+            plugin.getLogger().info("Injecting into world: " + e.getWorld().getName());
+            plugin.getStructureManager().injectPopulator(e.getWorld());
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -221,6 +234,8 @@ public class MWEventHandler implements Listener {
                 handleWarpHome(e);
             } else if (e.getItemDrop().getItemStack().getType() == plugin.getWarpItem()) {
                 handleWarpOther(e);
+            } else if (e.getItemDrop().getItemStack().getType() == plugin.getRandomItem()) {
+                handleWarpRandom(e);
             }
         }
     }

@@ -6,11 +6,13 @@ import net.acomputerdog.magicwells.db.WellDB;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.util.Random;
 import java.util.UUID;
 
 public class WellList {
     private final PluginMagicWells plugin;
     private final WellNamer wellNamer;
+    private final Random random;
 
     private WellDB db;
 
@@ -18,6 +20,7 @@ public class WellList {
     public WellList(PluginMagicWells plugin) {
         this.plugin = plugin;
         this.wellNamer = new WellNamer(plugin);
+        this.random = new Random();
 
         if (plugin.getConfig().getBoolean("database.external", false)) {
             plugin.getLogger().warning("External database is not yet supported!");
@@ -93,5 +96,11 @@ public class WellList {
         } catch (NumberFormatException e) {
             return getWellsByOwnerAndName(owner, nameOrID);
         }
+    }
+
+    public Well getRandomWell() {
+        int numWells = db.getNumberOfWells();
+        int wellID = random.nextInt(numWells);
+        return getWellByID(wellID);
     }
 }

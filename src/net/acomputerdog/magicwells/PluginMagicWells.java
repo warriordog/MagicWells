@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
+import java.util.List;
 
 public class PluginMagicWells extends JavaPlugin {
     private WellList wellList;
@@ -17,6 +18,9 @@ public class PluginMagicWells extends JavaPlugin {
 
     private Material homeItem;
     private Material warpItem;
+    private Material randomItem;
+
+    private List<String> allowedWorlds;
 
     @Override
     public void onEnable() {
@@ -24,14 +28,19 @@ public class PluginMagicWells extends JavaPlugin {
             // create plugin directory and any missing config file
             setupPluginDir();
 
-            homeItem = Material.getMaterial(getConfig().getString("home_well_item"));
+            homeItem = Material.getMaterial(getConfig().getString("well_item_warp_home"));
             if (homeItem == null) {
-                getLogger().warning("Unrecognised home item material.");
+                getLogger().warning("Unrecognised item material.");
             }
-            warpItem = Material.getMaterial(getConfig().getString("well_warp_item"));
+            warpItem = Material.getMaterial(getConfig().getString("well_item_warp_other"));
             if (warpItem == null) {
-                getLogger().warning("Unrecognised warp item material.");
+                getLogger().warning("Unrecognised item material.");
             }
+            randomItem = Material.getMaterial(getConfig().getString("well_item_warp_random"));
+            if (randomItem == null) {
+                getLogger().warning("Unrecognised item material.");
+            }
+            allowedWorlds = getConfig().getStringList("world_names");
 
             wellList = new WellList(this);
             structureManager = new StructureManager(this);
@@ -146,5 +155,13 @@ public class PluginMagicWells extends JavaPlugin {
 
     public Material getWarpItem() {
         return warpItem;
+    }
+
+    public Material getRandomItem() {
+        return randomItem;
+    }
+
+    public List<String> getAllowedWorlds() {
+        return allowedWorlds;
     }
 }

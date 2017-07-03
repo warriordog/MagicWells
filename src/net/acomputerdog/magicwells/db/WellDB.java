@@ -41,4 +41,6 @@ public interface WellDB {
     Well getHomeWell(UUID owner);
 
     void setHomeWell(UUID owner, Well homeWell);
+
+    int getNumberOfWells();
 }
