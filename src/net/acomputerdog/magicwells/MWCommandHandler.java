@@ -98,17 +98,20 @@ public class MWCommandHandler {
                 sendYellow(p, "Your wells:");
                 for (Well well : wells) {
                     StringBuilder m = new StringBuilder();
+                    m.append(ChatColor.YELLOW);
                     m.append(well.getName());
+                    m.append(ChatColor.AQUA);
                     m.append(" - ID");
                     m.append(well.getDbID());
-                    m.append(" - ");
+                    m.append(" (");
                     m.append(well.getLocation().getBlockX());
                     m.append(", ");
                     m.append(well.getLocation().getBlockY());
                     m.append(", ");
                     m.append(well.getLocation().getBlockZ());
+                    m.append(')');
 
-                    sendAqua(p, m.toString());
+                    p.sendMessage(m.toString());
                 }
             } else {
                 sendRed(sender, "This command can only be used by a player.");
