@@ -2,10 +2,7 @@ package net.acomputerdog.magicwells;
 
 import net.acomputerdog.magicwells.structure.Structure;
 import net.acomputerdog.magicwells.well.Well;
-import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +14,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class MWEventHandler implements Listener {
@@ -115,11 +113,16 @@ public class MWEventHandler implements Listener {
             Well homeWell = plugin.getWellList().getHomeWell(e.getPlayer().getUniqueId());
             if (homeWell == null) {
                 e.getPlayer().sendMessage(ChatColor.RED + "You do not have a home well, set it using /mwsethome.");
+                e.setCancelled(true);
             } else {
                 teleportToWell(e.getPlayer(), homeWell);
+
+                // delete the dropped item
+                e.getItemDrop().setItemStack(new ItemStack(Material.AIR));
             }
         } else {
             e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport home.");
+            e.setCancelled(true);
         }
     }
 
@@ -138,18 +141,25 @@ public class MWEventHandler implements Listener {
                 if (wells.length > 0) {
                     if (e.getPlayer().getUniqueId().equals(wells[0].getOwner())) {
                         teleportToWell(e.getPlayer(), wells[0]);
+
+                        // delete the dropped item
+                        e.getItemDrop().setItemStack(new ItemStack(Material.AIR));
                     } else {
                         e.getPlayer().sendMessage(ChatColor.RED + "The water splashes and froths before quieting down.  The target well is not yours!");
+                        e.setCancelled(true);
                     }
                 } else {
                     e.getPlayer().sendMessage(ChatColor.RED + "The water churns, and your item floats back to the surface.  Make sure you wrote the correct name or well ID.");
+                    e.setCancelled(true);
                 }
                 // teleport to random place
             } else {
                 e.getPlayer().sendMessage("Warping to a random place is not yet implemented.");
+                e.setCancelled(true);
             }
         } else {
             e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport to other wells.");
+            e.setCancelled(true);
         }
     }
 
@@ -203,7 +213,7 @@ public class MWEventHandler implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onItemDrop(PlayerDropItemEvent e) {
         // make sure player is in well
         if (e.getPlayer().hasMetadata(PLAYER_IN_WELL_KEY)) {
