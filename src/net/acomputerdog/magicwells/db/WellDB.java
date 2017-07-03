@@ -18,28 +18,22 @@ public interface WellDB {
     int getNumberOfWells();
 
     Well getWellByID(int wellID);
-
     int getWellIDFromTrigger(Location l);
     Well getWellFromBB(Location l);
-
-    Well getHomeWell(UUID owner);
 
     Well[] getWellsByOwnerAndName(UUID owner, String name);
     Well[] getWellsByOwner(UUID owner);
 
     String getWellName(int wellID);
-
     UUID getWellOwner(int wellID);
-
     Location getWellLocation(int wellID);
 
     void setWellOwner(int wellID, UUID owner);
-
     void setWellName(int wellID, String name);
 
     void setHomeWell(UUID owner, Well homeWell);
+    Well getHomeWell(UUID owner);
 
     int numWellBBsInRange(int x1, int z1, int x2, int z2);
-
     int numWellsInRange(int x1, int z1, int x2, int z2);
 }
