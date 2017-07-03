@@ -4,7 +4,6 @@ import net.acomputerdog.magicwells.well.Well;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface WellDB {
@@ -14,8 +13,6 @@ public interface WellDB {
     void disconnect();
 
     boolean isConnected();
-
-    void getWellsNear(Location loc, List<Location> outList);
 
     Well getWellByID(int id);
 
@@ -32,4 +29,6 @@ public interface WellDB {
     int numWellsInRange(int x1, int z1, int x2, int z2);
 
     Well getWellFromBB(Location l);
+
+    void saveWellOwner(int wellID, UUID id);
 }

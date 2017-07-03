@@ -5,6 +5,7 @@ import net.acomputerdog.magicwells.well.Well;
 import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -43,13 +44,48 @@ public class MWEventHandler implements Listener {
             int wellID = plugin.getWellList().getIDByTrigger(tempLocation);
             if (wellID > -1) {
                 Well well = getWell(wellID);
-                p.sendMessage(ChatColor.BLUE + "You touched a well: " + well.getName());
+
+                StringBuilder message = new StringBuilder();
+                message.append(ChatColor.AQUA);
+                message.append("You have found a well!  ");
+                message.append(ChatColor.YELLOW);
+                message.append(well.getName());
+                message.append(ChatColor.AQUA);
+                message.append(" is owned by ");
+                message.append(ChatColor.YELLOW);
+
+                if (well.getOwner() == null) {
+                    message.append("no one");
+                    message.append(ChatColor.AQUA);
+                    message.append(".  Claim it by jumping in!");
+                } else if (well.getOwner().equals(p.getUniqueId())) {
+                    message.append("you.");
+                } else {
+                    OfflinePlayer op = plugin.getServer().getOfflinePlayer(well.getOwner());
+                    message.append(op.getName());
+                    message.append(ChatColor.AQUA);
+                    message.append(".  Throw in nether blocks to break their claim!");
+                }
+
+                p.sendMessage(message.toString());
             }
         }
     }
 
     private Well getWell(int id) {
         return plugin.getWellList().getWellByID(id);
+    }
+
+    private void handlePlayerDiveInWell(Player p, Location loc, Well well) {
+        if (well.getOwner() == null) {
+            well.setOwner(p.getUniqueId());
+            plugin.getWellList().saveWellOwner(well);
+            p.sendMessage(ChatColor.AQUA + "You have claimed " + ChatColor.YELLOW + well.getName() + ChatColor.AQUA + "!");
+        } else if (well.getOwner() == p.getUniqueId()) {
+            p.sendMessage(ChatColor.AQUA + "This is your well, " + ChatColor.YELLOW + well.getName() + ChatColor.AQUA + ".");
+        } else {
+            p.sendMessage(ChatColor.RED + "The water around you churns and tries to drag you down.  This well belongs to someone else!");
+        }
     }
 
     private void checkChunks(Chunk c, Player p) {
@@ -89,6 +125,7 @@ public class MWEventHandler implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent e) {
+        // TODO check for wells that overlap into this chunk (from another)
         if (e.getTo().getChunk() != e.getFrom().getChunk()) {
             checkChunks(e.getTo().getChunk(), e.getPlayer());
         }
@@ -101,7 +138,7 @@ public class MWEventHandler implements Listener {
                     if (!e.getPlayer().hasMetadata(PLAYER_IN_WELL_KEY) ||
                             e.getPlayer().getMetadata(PLAYER_IN_WELL_KEY).get(0).asInt() != well.getDbID()) {
                         e.getPlayer().setMetadata(PLAYER_IN_WELL_KEY, new FixedMetadataValue(plugin, well.getDbID()));
-                        e.getPlayer().sendMessage("You dived into " + well.getName() + "!");
+                        handlePlayerDiveInWell(e.getPlayer(), e.getTo(), well);
                     }
                 } else {
                     e.getPlayer().removeMetadata(PLAYER_IN_WELL_KEY, plugin);

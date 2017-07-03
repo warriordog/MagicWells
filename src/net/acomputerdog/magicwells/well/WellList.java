@@ -63,4 +63,8 @@ public class WellList {
     public Well getWellByCollision(Location l) {
         return db.getWellFromBB(l);
     }
+
+    public void saveWellOwner(Well well) {
+        db.saveWellOwner(well.getDbID(), well.getOwner());
+    }
 }

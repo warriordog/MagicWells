@@ -7,7 +7,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.sql.*;
-import java.util.List;
 import java.util.UUID;
 
 public class InternalDB implements WellDB {
@@ -31,6 +30,7 @@ public class InternalDB implements WellDB {
     private PreparedStatement getWellOwnerStatement;
     private PreparedStatement insertWellOwnerStatement;
     private PreparedStatement updateWellOwnerStatement;
+    private PreparedStatement deleteWellOwnerStatement;
 
     private PreparedStatement getWellLocationStatement;
 
@@ -79,7 +79,9 @@ public class InternalDB implements WellDB {
 
             getWellOwnerStatement = connection.prepareStatement("SELECT ownerUUID FROM WellOwners WHERE wellID = ?");
             insertWellOwnerStatement = connection.prepareStatement("INSERT INTO WellOwners(wellID, ownerUUID) VALUES (?, ?)");
+            // this one is owner THEN id
             updateWellOwnerStatement = connection.prepareStatement("UPDATE WellOwners SET ownerUUID = ? WHERE wellID = ?");
+            deleteWellOwnerStatement = connection.prepareStatement("DELETE FROM WellOwners WHERE wellID = ?");
 
             insertWellTriggerStatement = connection.prepareStatement("INSERT INTO WellTriggers(wellID, worldName, offX, offY, offZ) VALUES (?, ?, ?, ?, ?)");
             getWellFromTrigger = connection.prepareStatement("SELECT wellID FROM WellTriggers WHERE worldName = ? AND offX = ? AND offY = ? AND offZ = ?");
@@ -112,7 +114,7 @@ public class InternalDB implements WellDB {
         try {
             execUpdate("CREATE TABLE IF NOT EXISTS Wells (wellID INTEGER IDENTITY, worldName VARCHAR(100), locX INTEGER NOT NULL, locY INTEGER NOT NULL, locZ INTEGER NOT NULL, PRIMARY KEY (wellID))");
             execUpdate("CREATE TABLE IF NOT EXISTS WellNames (wellID INTEGER NOT NULL, wellName VARCHAR(50) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
-            execUpdate("CREATE TABLE IF NOT EXISTS WellOwners (wellID INTEGER NOT NULL, ownerUUID UUID NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            execUpdate("CREATE TABLE IF NOT EXISTS WellOwners (wellID INTEGER NOT NULL, ownerUUID CHAR(36) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
             execUpdate("CREATE TABLE IF NOT EXISTS WellTriggers (wellID INTEGER NOT NULL, worldName VARCHAR(100), offX INTEGER NOT NULL, offY INTEGER NOT NULL, offZ INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
             execUpdate("CREATE TABLE IF NOT EXISTS WellBBs (wellID INTEGER NOT NULL, worldName VARCHAR(100), x1 INTEGER NOT NULL, y1 INTEGER NOT NULL, z1 INTEGER NOT NULL, x2 INTEGER NOT NULL, y2 INTEGER NOT NULL, z2 INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
         } catch (SQLException e) {
@@ -139,11 +141,6 @@ public class InternalDB implements WellDB {
         } catch (SQLException ignored) {
             return false;
         }
-    }
-
-    @Override
-    public void getWellsNear(Location loc, List<Location> outList) {
-
     }
 
     @Override
@@ -322,6 +319,37 @@ public class InternalDB implements WellDB {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Unable to search for wells", e);
+        }
+    }
+
+    @Override
+    public void saveWellOwner(int wellID, UUID uuid) {
+        try {
+            if (uuid == null) {
+                deleteWellOwnerStatement.setInt(1, wellID);
+
+                if (deleteWellOwnerStatement.executeUpdate() < 0) {
+                    throw new RuntimeException("Error deleting well owner.");
+                }
+            } else {
+                // this one is backwards
+                updateWellOwnerStatement.setInt(2, wellID);
+                updateWellOwnerStatement.setString(1, uuid.toString());
+
+                int result = updateWellOwnerStatement.executeUpdate();
+                if (result < 0) {
+                    throw new RuntimeException("Error updating well owner.");
+                } else if (result == 0) {
+                    insertWellOwnerStatement.setInt(1, wellID);
+                    insertWellOwnerStatement.setString(2, uuid.toString());
+
+                    if (insertWellOwnerStatement.executeUpdate() < 0) {
+                        throw new RuntimeException("Error inserting well owner.");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to save well owner.", e);
         }
     }
 
