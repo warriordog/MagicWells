@@ -20,48 +20,6 @@ class StructBlock {
         this.zOff = zOff;
     }
 
-    public Material getBlock() {
-        return block;
-    }
-
-    public int getXOff() {
-        return xOff;
-    }
-
-    public int getYOff() {
-        return yOff;
-    }
-
-    public int getZOff() {
-        return zOff;
-    }
-
-    /**
-     * Checks if a location relative to a base position is equal to the position of this component
-     *
-     * @param root The location to use as a base
-     * @param loc  The real location
-     * @return return true if the location matches, false otherwise
-     */
-    public boolean locationMatches(Location root, Location loc) {
-        int blockX = calcOff(root.getBlockX(), loc.getBlockX());
-        if (blockX != xOff) {
-            return false;
-        }
-
-        int blockY = calcOff(root.getBlockY(), loc.getBlockY());
-        if (blockY != yOff) {
-            return false;
-        }
-
-        int blockZ = calcOff(root.getBlockZ(), loc.getBlockZ());
-        if (blockZ != zOff) {
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * Checks if a block matches this component as a part of the structure at the specified location
      *
@@ -95,6 +53,22 @@ class StructBlock {
         }
 
         return true;
+    }
+
+    public Material getBlock() {
+        return block;
+    }
+
+    public int getXOff() {
+        return xOff;
+    }
+
+    public int getYOff() {
+        return yOff;
+    }
+
+    public int getZOff() {
+        return zOff;
     }
 
     /**

@@ -25,10 +25,6 @@ public class Well {
         this.owner = owner;
     }
 
-    public boolean isIntact() {
-        return true;
-    }
-
     public int getDbID() {
         return dbID;
     }

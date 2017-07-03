@@ -34,6 +34,16 @@ public class MWPopulator extends BlockPopulator {
         }
     }
 
+    //make sure that well does not conflict with any important
+    private static int findGround(Chunk c, int x, int z) {
+        for (int y = 255; y >= 0; y--) {
+            if (c.getBlock(x, y, z).getType().isSolid()) {
+                return y;
+            }
+        }
+        return -1;
+    }
+
     public boolean canReplaceBlock(Block block) {
         return !avoidBlocks.contains(block.getType());
     }
@@ -81,16 +91,6 @@ public class MWPopulator extends BlockPopulator {
         manager.getWellStruct().generate(loc);
         manager.getPlugin().getWellList().createWell(loc);
         return true;
-    }
-
-    //make sure that well does not conflict with any important
-    private static int findGround(Chunk c, int x, int z) {
-        for (int y = 255; y >= 0; y--) {
-            if (c.getBlock(x, y, z).getType().isSolid()) {
-                return y;
-            }
-        }
-        return -1;
     }
 
     public StructureManager getStructureManager() {

@@ -13,8 +13,7 @@ public class WellList {
     private final PluginMagicWells plugin;
     private final WellNamer wellNamer;
     private final Random random;
-
-    private WellDB db;
+    private final WellDB db;
 
 
     public WellList(PluginMagicWells plugin) {
@@ -51,7 +50,7 @@ public class WellList {
     }
 
     public int getIDByTrigger(Location loc) {
-        return db.getWellFromTrigger(loc);
+        return db.getWellIDFromTrigger(loc);
     }
 
     public Well getWellByID(int id) {

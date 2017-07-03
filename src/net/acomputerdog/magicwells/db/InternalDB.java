@@ -171,15 +171,15 @@ public class InternalDB implements WellDB {
     }
 
     @Override
-    public Well getWellByID(int id) {
-        String name = getWellName(id);
-        UUID owner = getWellOwner(id);
-        Location loc = getWellLocation(id);
-        Location bb1 = getWellBB1(id);
-        Location bb2 = getWellBB2(id);
+    public Well getWellByID(int wellID) {
+        String name = getWellName(wellID);
+        UUID owner = getWellOwner(wellID);
+        Location loc = getWellLocation(wellID);
+        Location bb1 = getWellBB1(wellID);
+        Location bb2 = getWellBB2(wellID);
 
         Well well = new Well(loc, bb2, bb1, name);
-        well.setDbID(id);
+        well.setDbID(wellID);
         well.setOwner(owner);
         return well;
     }
@@ -242,7 +242,7 @@ public class InternalDB implements WellDB {
     }
 
     @Override
-    public int getWellFromTrigger(Location l) {
+    public int getWellIDFromTrigger(Location l) {
         try {
             getWellFromTrigger.setString(1, l.getWorld().getName());
             getWellFromTrigger.setInt(2, l.getBlockX());
@@ -350,9 +350,9 @@ public class InternalDB implements WellDB {
     }
 
     @Override
-    public void saveWellOwner(int wellID, UUID uuid) {
+    public void saveWellOwner(int wellID, UUID owner) {
         try {
-            if (uuid == null) {
+            if (owner == null) {
                 deleteWellOwnerStatement.setInt(1, wellID);
 
                 if (deleteWellOwnerStatement.executeUpdate() < 0) {
@@ -361,14 +361,14 @@ public class InternalDB implements WellDB {
             } else {
                 // this one is backwards
                 updateWellOwnerStatement.setInt(2, wellID);
-                updateWellOwnerStatement.setString(1, uuid.toString());
+                updateWellOwnerStatement.setString(1, owner.toString());
 
                 int result = updateWellOwnerStatement.executeUpdate();
                 if (result < 0) {
                     throw new RuntimeException("Error updating well owner.");
                 } else if (result == 0) {
                     insertWellOwnerStatement.setInt(1, wellID);
-                    insertWellOwnerStatement.setString(2, uuid.toString());
+                    insertWellOwnerStatement.setString(2, owner.toString());
 
                     if (insertWellOwnerStatement.executeUpdate() < 0) {
                         throw new RuntimeException("Error inserting well owner.");

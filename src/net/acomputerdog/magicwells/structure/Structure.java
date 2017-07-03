@@ -19,15 +19,16 @@ public class Structure implements Iterable<StructBlock> {
 
     // the components of the structure stored in X+ Z+ Y- order
     private final StructBlock[] components;
+
+    // structure size and position
     private final int width; //x
     private final int height; //y
     private final int length; //z
     private final int offset; //distance to move upwards before generating
 
+    //trigger block
     private final Material triggerBlock; //trigger block for this structure
-    private final int triggerOffX;
-    private final int triggerOffY;
-    private final int triggerOffZ;
+    private final int triggerOffX, triggerOffY, triggerOffZ;
 
     // bounding box
     private final int bbX1, bbY1, bbZ1, bbX2, bbY2, bbZ2;
@@ -35,11 +36,12 @@ public class Structure implements Iterable<StructBlock> {
     // shared Location instance
     private final Location tempLocation = new Location(null, 0, 0, 0);
 
-    //TODO clean this up and split into different methods or a different class
+    //This is a huge constructor, but it has to be like this because fields are final and cannot
+    //  be set from other methods
     public Structure(MWPopulator populator, BufferedReader reader) throws IOException {
         this.populator = populator;
 
-        // ready() call reads in the line that is read as "first"
+        // Read in the dimensions
         if (!reader.ready()) {
             throw new IllegalArgumentException("Input file is empty.");
         }
@@ -48,7 +50,6 @@ public class Structure implements Iterable<StructBlock> {
         if (firstParts.length != 4) {
             throw new IllegalArgumentException("Input file does not include dimensions.");
         }
-
         try {
             this.width = Integer.parseInt(firstParts[0]);
             this.length = Integer.parseInt(firstParts[1]);
@@ -58,6 +59,7 @@ public class Structure implements Iterable<StructBlock> {
             throw new IllegalArgumentException("Input file has non-integer dimensions.");
         }
 
+        // read in the trigger block material
         if (!reader.ready()) {
             throw new IllegalArgumentException("Input file is cut short.");
         }
@@ -68,6 +70,7 @@ public class Structure implements Iterable<StructBlock> {
         }
         this.triggerBlock = triggerMat;
 
+        // read in the bounding box
         if (!reader.ready()) {
             throw new IllegalArgumentException("Input file is cut short.");
         }
@@ -76,7 +79,6 @@ public class Structure implements Iterable<StructBlock> {
         if (thirdParts.length != 6) {
             throw new IllegalArgumentException("Input file does not include bounding box.");
         }
-
         try {
             this.bbX1 = Integer.parseInt(thirdParts[0]);
             this.bbY1 = height - Integer.parseInt(thirdParts[1]) - offset;
@@ -87,6 +89,8 @@ public class Structure implements Iterable<StructBlock> {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Input file has non-integer bounding box.");
         }
+
+        // Read in the blocks
         // YZX order for efficiency
         String[][][] blocks = new String[height][length][width];
         int y = 0; // read in normal order so it gets flipped below
@@ -122,6 +126,7 @@ public class Structure implements Iterable<StructBlock> {
             }
         }
 
+        // Convert 3D array to 1D "packed" array that skips empty spaces
         // can't assign a final in a loop
         int tOffX = 0;
         int tOffY = 0;
@@ -156,28 +161,13 @@ public class Structure implements Iterable<StructBlock> {
         }
         this.components = structBlocks.toArray(new StructBlock[structBlocks.size()]);
 
+        // make sure that the trigger block showed up somewhere in the file
         if (!triggerFound) {
             throw new IllegalArgumentException("Input structure has not trigger block.");
         }
         this.triggerOffX = tOffX;
         this.triggerOffY = tOffY;
         this.triggerOffZ = tOffZ;
-    }
-
-    public StructBlock[] getComponents() {
-        return components;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public int getLength() {
-        return length;
     }
 
     public void generate(Location l) {
@@ -234,33 +224,6 @@ public class Structure implements Iterable<StructBlock> {
         return triggerOffZ;
     }
 
-    public boolean isAtLocation(Location l) {
-        if (l.getWorld() == null) {
-            throw new IllegalArgumentException("Location must include a world");
-        }
-
-        for (StructBlock block : components) {
-            if (!block.blockMatches(l, l.getWorld().getBlockAt(l))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public boolean isInBoundingBox(Location root, Location loc) {
-        calcLocalOffset(root, loc, tempLocation);
-        if (tempLocation.getBlockX() >= bbX1 && tempLocation.getBlockX() <= bbX2) {
-            if (tempLocation.getBlockY() >= bbY1 && tempLocation.getBlockY() <= bbY2) {
-                if (tempLocation.getBlockZ() >= bbZ1 && tempLocation.getBlockZ() <= bbZ2) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     public Location getBB1() {
         return new Location(null, bbX1, bbY1, bbZ1);
     }
@@ -269,6 +232,25 @@ public class Structure implements Iterable<StructBlock> {
         return new Location(null, bbX2, bbY2, bbZ2);
     }
 
+    public StructBlock[] getComponents() {
+        return components;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    /*
+        Calculates the offset of "loc" from "root" and stores it in "out"
+     */
     private static void calcLocalOffset(Location root, Location loc, Location out) {
         out.setWorld(root.getWorld());
         out.setX(loc.getBlockX() - root.getBlockX());

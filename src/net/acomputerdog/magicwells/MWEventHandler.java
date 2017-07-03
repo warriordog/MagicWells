@@ -23,7 +23,7 @@ public class MWEventHandler implements Listener {
 
     private final PluginMagicWells plugin;
 
-    private Location tempLocation = new Location(null, 0, 0, 0);
+    private final Location tempLocation = new Location(null, 0, 0, 0);
 
     public MWEventHandler(PluginMagicWells plugin) {
         this.plugin = plugin;
@@ -75,7 +75,7 @@ public class MWEventHandler implements Listener {
         return plugin.getWellList().getWellByID(id);
     }
 
-    private void handlePlayerDiveInWell(Player p, Location loc, Well well) {
+    private void handlePlayerDiveInWell(Player p, Well well) {
         if (well.getOwner() == null) {
             well.setOwner(p.getUniqueId());
             plugin.getWellList().saveWellOwner(well);
@@ -217,7 +217,7 @@ public class MWEventHandler implements Listener {
                     if (!e.getPlayer().hasMetadata(PLAYER_IN_WELL_KEY) ||
                             e.getPlayer().getMetadata(PLAYER_IN_WELL_KEY).get(0).asInt() != well.getDbID()) {
                         e.getPlayer().setMetadata(PLAYER_IN_WELL_KEY, new FixedMetadataValue(plugin, well.getDbID()));
-                        handlePlayerDiveInWell(e.getPlayer(), e.getTo(), well);
+                        handlePlayerDiveInWell(e.getPlayer(), well);
                     }
                 } else {
                     e.getPlayer().removeMetadata(PLAYER_IN_WELL_KEY, plugin);

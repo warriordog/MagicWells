@@ -11,36 +11,33 @@ public interface WellDB {
 
     void connect();
     void disconnect();
-
     boolean isConnected();
-
-    Well getWellByID(int id);
 
     void createWell(Well well);
 
-    int getWellFromTrigger(Location l);
+    int getNumberOfWells();
 
-    String getWellName(int wellID);
+    Well getWellByID(int wellID);
 
-    UUID getWellOwner(int id);
-
-    Location getWellLocation(int id);
-
-    int numWellsInRange(int x1, int z1, int x2, int z2);
-
+    int getWellIDFromTrigger(Location l);
     Well getWellFromBB(Location l);
-
-    void saveWellOwner(int wellID, UUID id);
-
-    Well[] getWellsByOwnerAndName(UUID owner, String name);
-
-    Well[] getWellsByOwner(UUID owner);
-
-    int numWellBBsInRange(int x1, int z1, int x2, int z2);
 
     Well getHomeWell(UUID owner);
 
+    Well[] getWellsByOwnerAndName(UUID owner, String name);
+    Well[] getWellsByOwner(UUID owner);
+
+    String getWellName(int wellID);
+
+    UUID getWellOwner(int wellID);
+
+    Location getWellLocation(int wellID);
+
+    void saveWellOwner(int wellID, UUID owner);
+
     void setHomeWell(UUID owner, Well homeWell);
 
-    int getNumberOfWells();
+    int numWellBBsInRange(int x1, int z1, int x2, int z2);
+
+    int numWellsInRange(int x1, int z1, int x2, int z2);
 }
