@@ -85,4 +85,13 @@ public class WellList {
     public void setHomeWell(UUID owner, Well homeWell) {
         db.setHomeWell(owner, homeWell);
     }
+
+    public Well[] getWellsByOwnerAndNameOrID(UUID owner, String nameOrID) {
+        try {
+            int id = Integer.parseInt(nameOrID);
+            return new Well[]{getWellByID(id)};
+        } catch (NumberFormatException e) {
+            return getWellsByOwnerAndName(owner, nameOrID);
+        }
+    }
 }

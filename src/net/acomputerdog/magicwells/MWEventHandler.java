@@ -99,6 +99,60 @@ public class MWEventHandler implements Listener {
         }
     }
 
+    private void teleportToWell(Player p, Well well) {
+        p.sendMessage(ChatColor.AQUA + "The water suddenly rushes downwards, dragging you away!");
+        Location wellLoc = well.getLocation();
+        tempLocation.setWorld(wellLoc.getWorld());
+        tempLocation.setX(wellLoc.getBlockX());
+        tempLocation.setY(wellLoc.getBlockY() + 1); // place on top of corner
+        tempLocation.setZ(wellLoc.getBlockZ());
+        p.teleport(tempLocation);
+        //TODO offset
+    }
+
+    private void handleWarpHome(PlayerDropItemEvent e) {
+        if (e.getPlayer().hasPermission("magicwells.feature.port.home")) {
+            Well homeWell = plugin.getWellList().getHomeWell(e.getPlayer().getUniqueId());
+            if (homeWell == null) {
+                e.getPlayer().sendMessage(ChatColor.RED + "You do not have a home well, set it using /mwsethome.");
+            } else {
+                teleportToWell(e.getPlayer(), homeWell);
+            }
+        } else {
+            e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport home.");
+        }
+    }
+
+    private void handleWarpOther(PlayerDropItemEvent e) {
+        if (e.getPlayer().hasPermission("magicwells.feature.port.other")) {
+            String name = null;
+            if (e.getItemDrop().getItemStack().hasItemMeta()) {
+                if (e.getItemDrop().getItemStack().getItemMeta().hasDisplayName()) {
+                    name = e.getItemDrop().getItemStack().getItemMeta().getDisplayName();
+                }
+            }
+
+            // teleport to location
+            if (name != null) {
+                Well[] wells = plugin.getWellList().getWellsByOwnerAndNameOrID(e.getPlayer().getUniqueId(), name);
+                if (wells.length > 0) {
+                    if (e.getPlayer().getUniqueId().equals(wells[0].getOwner())) {
+                        teleportToWell(e.getPlayer(), wells[0]);
+                    } else {
+                        e.getPlayer().sendMessage(ChatColor.RED + "The water splashes and froths before quieting down.  The target well is not yours!");
+                    }
+                } else {
+                    e.getPlayer().sendMessage(ChatColor.RED + "The water churns, and your item floats back to the surface.  Make sure you wrote the correct name or well ID.");
+                }
+                // teleport to random place
+            } else {
+                e.getPlayer().sendMessage("Warping to a random place is not yet implemented.");
+            }
+        } else {
+            e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport to other wells.");
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockInteract(PlayerInteractEvent e) {
         if (e.getHand() == EquipmentSlot.HAND) {
@@ -154,19 +208,9 @@ public class MWEventHandler implements Listener {
         // make sure player is in well
         if (e.getPlayer().hasMetadata(PLAYER_IN_WELL_KEY)) {
             if (e.getItemDrop().getItemStack().getType() == plugin.getHomeItem()) {
-                if (e.getPlayer().hasPermission("magicwells.feature.port.home")) {
-                    Well homeWell = plugin.getWellList().getHomeWell(e.getPlayer().getUniqueId());
-                    if (homeWell == null) {
-                        e.getPlayer().sendMessage(ChatColor.RED + "You do not have a home well, set it using /mwsethome.");
-                    } else {
-                        e.getPlayer().sendMessage(ChatColor.AQUA + "The water suddenly rushes downwards, dragging you away!");
-                        Location target = new Location(homeWell.getLocation().getWorld(), homeWell.getLocation().getBlockX(), homeWell.getLocation().getBlockY() + 1, homeWell.getLocation().getBlockZ());
-                        e.getPlayer().teleport(target); // place on corner
-                        //TODO offset
-                    }
-                } else {
-                    e.getPlayer().sendMessage(ChatColor.RED + "You do not have permission to teleport home.");
-                }
+                handleWarpHome(e);
+            } else if (e.getItemDrop().getItemStack().getType() == plugin.getWarpItem()) {
+                handleWarpOther(e);
             }
         }
     }

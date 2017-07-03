@@ -16,6 +16,7 @@ public class PluginMagicWells extends JavaPlugin {
     private MWCommandHandler commandHandler;
 
     private Material homeItem;
+    private Material warpItem;
 
     @Override
     public void onEnable() {
@@ -26,6 +27,10 @@ public class PluginMagicWells extends JavaPlugin {
             homeItem = Material.getMaterial(getConfig().getString("home_well_item"));
             if (homeItem == null) {
                 getLogger().warning("Unrecognised home item material.");
+            }
+            warpItem = Material.getMaterial(getConfig().getString("well_warp_item"));
+            if (warpItem == null) {
+                getLogger().warning("Unrecognised warp item material.");
             }
 
             wellList = new WellList(this);
@@ -137,5 +142,9 @@ public class PluginMagicWells extends JavaPlugin {
 
     public Material getHomeItem() {
         return homeItem;
+    }
+
+    public Material getWarpItem() {
+        return warpItem;
     }
 }
