@@ -34,6 +34,11 @@ public class WellNamer {
         for (int i = 0; i < random.nextInt(3) + 1; i++) {
             name.append(syllables.get(random.nextInt(syllables.size())));
         }
-        return name.toString();
+        String nameString = name.toString();
+        if (nameString.length() > 1) {
+            return nameString.substring(0, 1).toUpperCase().concat(nameString.substring(1));
+        } else {
+            return nameString.toUpperCase();
+        }
     }
 }
