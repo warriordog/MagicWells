@@ -21,6 +21,8 @@ public class InternalDB implements WellDB {
 
     private PreparedStatement getWellFromLoc;
     private PreparedStatement getWellFromTrigger;
+    private PreparedStatement getWellsInArea;
+    private PreparedStatement getWellFromBBStatement;
 
     private PreparedStatement getWellNameStatement;
     private PreparedStatement insertWellNameStatement;
@@ -33,6 +35,10 @@ public class InternalDB implements WellDB {
     private PreparedStatement getWellLocationStatement;
 
     private PreparedStatement insertWellTriggerStatement;
+
+    private PreparedStatement insertWellBBStatement;
+    private PreparedStatement getWellBB1Statement;
+    private PreparedStatement getWellBB2Statement;
 
     public InternalDB(PluginMagicWells plugin) {
         this.plugin = plugin;
@@ -79,6 +85,14 @@ public class InternalDB implements WellDB {
             getWellFromTrigger = connection.prepareStatement("SELECT wellID FROM WellTriggers WHERE worldName = ? AND offX = ? AND offY = ? AND offZ = ?");
 
             getWellLocationStatement = connection.prepareStatement("SELECT worldName, locX, locY, locZ FROM Wells WHERE wellID = ?");
+
+            getWellsInArea = connection.prepareStatement("SELECT wellID FROM Wells WHERE locX >= ? AND locX <= ? AND locZ >= ? AND locZ <= ?");
+
+            insertWellBBStatement = connection.prepareStatement("INSERT INTO WellBBs(wellID, worldName, x1, y1, z1, x2, y2, z2) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+            getWellFromBBStatement = connection.prepareStatement("SELECT wellID FROM WellBBs WHERE worldName = ? AND x1 <= ? AND y1 <= ? AND z1 <= ? AND x2 >= ? AND y2 >= ? AND z2 >= ?");
+
+            getWellBB1Statement = connection.prepareStatement("SELECT worldName, x1, y1, z1 FROM WellBBs WHERE wellID = ?");
+            getWellBB2Statement = connection.prepareStatement("SELECT worldName, x2, y2, z2 FROM WellBBs WHERE wellID = ?");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("HSQLDB is missing from the jar!  Please add it or use an external database.", e);
         } catch (SQLException e) {
@@ -100,6 +114,7 @@ public class InternalDB implements WellDB {
             execUpdate("CREATE TABLE IF NOT EXISTS WellNames (wellID INTEGER NOT NULL, wellName VARCHAR(50) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
             execUpdate("CREATE TABLE IF NOT EXISTS WellOwners (wellID INTEGER NOT NULL, ownerUUID UUID NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
             execUpdate("CREATE TABLE IF NOT EXISTS WellTriggers (wellID INTEGER NOT NULL, worldName VARCHAR(100), offX INTEGER NOT NULL, offY INTEGER NOT NULL, offZ INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            execUpdate("CREATE TABLE IF NOT EXISTS WellBBs (wellID INTEGER NOT NULL, worldName VARCHAR(100), x1 INTEGER NOT NULL, y1 INTEGER NOT NULL, z1 INTEGER NOT NULL, x2 INTEGER NOT NULL, y2 INTEGER NOT NULL, z2 INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
         } catch (SQLException e) {
             throw new RuntimeException("SQL error while verifying database", e);
         }
@@ -136,8 +151,10 @@ public class InternalDB implements WellDB {
         String name = getWellName(id);
         UUID owner = getWellOwner(id);
         Location loc = getWellLocation(id);
+        Location bb1 = getWellBB1(id);
+        Location bb2 = getWellBB2(id);
 
-        Well well = new Well(loc, name);
+        Well well = new Well(loc, bb2, bb1, name);
         well.setDbID(id);
         well.setOwner(owner);
         return well;
@@ -182,6 +199,18 @@ public class InternalDB implements WellDB {
             insertWellTriggerStatement.setInt(5, getTriggerZ(well));
             if (insertWellTriggerStatement.executeUpdate() < 1) {
                 throw new RuntimeException("Error adding well trigger to database.");
+            }
+
+            insertWellBBStatement.setInt(1, id);
+            insertWellBBStatement.setString(2, well.getLocation().getWorld().getName());
+            insertWellBBStatement.setInt(3, well.getLocation().getBlockX() + well.getBB1().getBlockX());
+            insertWellBBStatement.setInt(4, well.getLocation().getBlockY() - well.getBB1().getBlockY());
+            insertWellBBStatement.setInt(5, well.getLocation().getBlockZ() + well.getBB1().getBlockZ());
+            insertWellBBStatement.setInt(6, well.getLocation().getBlockX() + well.getBB2().getBlockX());
+            insertWellBBStatement.setInt(7, well.getLocation().getBlockY() - well.getBB2().getBlockY());
+            insertWellBBStatement.setInt(8, well.getLocation().getBlockZ() + well.getBB2().getBlockZ());
+            if (insertWellBBStatement.executeUpdate() < 1) {
+                throw new RuntimeException("Error adding well BB to database.");
             }
         } catch (SQLException e) {
             throw new RuntimeException("Unable to save well", e);
@@ -252,6 +281,77 @@ public class InternalDB implements WellDB {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Exception getting well name", e);
+        }
+    }
+
+    @Override
+    public int numWellsInRange(int x1, int z1, int x2, int z2) {
+        try {
+            getWellsInArea.setInt(1, x1);
+            getWellsInArea.setInt(2, x2);
+            getWellsInArea.setInt(3, z1);
+            getWellsInArea.setInt(4, z2);
+
+            ResultSet results = getWellsInArea.executeQuery();
+            int count = 0;
+            while (results.next()) {
+                count++;
+            }
+            return count;
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to search for wells", e);
+        }
+    }
+
+    @Override
+    public Well getWellFromBB(Location l) {
+        try {
+            getWellFromBBStatement.setString(1, l.getWorld().getName());
+            getWellFromBBStatement.setInt(2, l.getBlockX());
+            getWellFromBBStatement.setInt(3, l.getBlockY());
+            getWellFromBBStatement.setInt(4, l.getBlockZ());
+            getWellFromBBStatement.setInt(5, l.getBlockX());
+            getWellFromBBStatement.setInt(6, l.getBlockY());
+            getWellFromBBStatement.setInt(7, l.getBlockZ());
+
+            ResultSet results = getWellFromBBStatement.executeQuery();
+            if (!results.next()) {
+                return null;
+            } else {
+                return getWellByID(results.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to search for wells", e);
+        }
+    }
+
+    private Location getWellBB1(int wellID) {
+        try {
+            getWellBB1Statement.setInt(1, wellID);
+
+            ResultSet results = getWellBB1Statement.executeQuery();
+            if (!results.next()) {
+                return null;
+            } else {
+                return new Location(plugin.getServer().getWorld(results.getString(1)), results.getInt(2), results.getInt(3), results.getInt(4));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Exception getting well bounding box 1", e);
+        }
+    }
+
+    private Location getWellBB2(int wellID) {
+        try {
+            getWellBB2Statement.setInt(1, wellID);
+
+            ResultSet results = getWellBB2Statement.executeQuery();
+            if (!results.next()) {
+                return null;
+            } else {
+                return new Location(plugin.getServer().getWorld(results.getString(1)), results.getInt(2), results.getInt(3), results.getInt(4));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Exception getting well bounding box 2", e);
         }
     }
 

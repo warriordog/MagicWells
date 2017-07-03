@@ -1,7 +1,9 @@
 5,5,8,3
 GLOWSTONE
-# ^ trigger block - can only be one in the structure
-# ^^ is width, length, height, offset
+1,1,1,4,4,4
+# ^ is bounding box (lower(X Y Z) upper(X Y Z)).  Offset from top left corner.
+# ^^ trigger block - can only be one in the structure
+# ^^^ is width, length, height, offset
 
 # Default well structure
 # a ' ' or '.' as material means not part of the structure

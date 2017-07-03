@@ -6,17 +6,21 @@ import java.util.UUID;
 
 public class Well {
     private final Location location;
+    private final Location bb1, bb2;
+
     private UUID owner;
     private String name;
     private int dbID;
 
-    public Well(Location location, String name) {
-        this(-1, location, name, null);
+    public Well(Location location, Location bb1, Location bb2, String name) {
+        this(-1, location, bb1, bb2, name, null);
     }
 
-    public Well(int dbID, Location location, String name, UUID owner) {
+    public Well(int dbID, Location location, Location bb1, Location bb2, String name, UUID owner) {
         this.dbID = dbID;
         this.location = location;
+        this.bb1 = bb1;
+        this.bb2 = bb2;
         this.name = name;
         this.owner = owner;
     }
@@ -47,5 +51,13 @@ public class Well {
 
     public void setOwner(UUID owner) {
         this.owner = owner;
+    }
+
+    public Location getBB1() {
+        return bb1;
+    }
+
+    public Location getBB2() {
+        return bb2;
     }
 }

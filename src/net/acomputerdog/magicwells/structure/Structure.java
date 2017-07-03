@@ -29,6 +29,12 @@ public class Structure implements Iterable<StructBlock> {
     private final int triggerOffY;
     private final int triggerOffZ;
 
+    // bounding box
+    private final int bbX1, bbY1, bbZ1, bbX2, bbY2, bbZ2;
+
+    // shared Location instance
+    private final Location tempLocation = new Location(null, 0, 0, 0);
+
     //TODO clean this up and split into different methods or a different class
     public Structure(MWPopulator populator, BufferedReader reader) throws IOException {
         this.populator = populator;
@@ -62,6 +68,25 @@ public class Structure implements Iterable<StructBlock> {
         }
         this.triggerBlock = triggerMat;
 
+        if (!reader.ready()) {
+            throw new IllegalArgumentException("Input file is cut short.");
+        }
+        String third = reader.readLine();
+        String[] thirdParts = third.split(",");
+        if (thirdParts.length != 6) {
+            throw new IllegalArgumentException("Input file does not include bounding box.");
+        }
+
+        try {
+            this.bbX1 = Integer.parseInt(thirdParts[0]);
+            this.bbY1 = height - Integer.parseInt(thirdParts[1]) - offset;
+            this.bbZ1 = Integer.parseInt(thirdParts[2]);
+            this.bbX2 = Integer.parseInt(thirdParts[3]);
+            this.bbY2 = height - Integer.parseInt(thirdParts[4]) - offset;
+            this.bbZ2 = Integer.parseInt(thirdParts[5]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Input file has non-integer bounding box.");
+        }
         // YZX order for efficiency
         String[][][] blocks = new String[height][length][width];
         int y = 0; // read in normal order so it gets flipped below
@@ -221,5 +246,33 @@ public class Structure implements Iterable<StructBlock> {
         }
 
         return true;
+    }
+
+    public boolean isInBoundingBox(Location root, Location loc) {
+        calcLocalOffset(root, loc, tempLocation);
+        if (tempLocation.getBlockX() >= bbX1 && tempLocation.getBlockX() <= bbX2) {
+            if (tempLocation.getBlockY() >= bbY1 && tempLocation.getBlockY() <= bbY2) {
+                if (tempLocation.getBlockZ() >= bbZ1 && tempLocation.getBlockZ() <= bbZ2) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public Location getBB1() {
+        return new Location(null, bbX1, bbY1, bbZ1);
+    }
+
+    public Location getBB2() {
+        return new Location(null, bbX2, bbY2, bbZ2);
+    }
+
+    private static void calcLocalOffset(Location root, Location loc, Location out) {
+        out.setWorld(root.getWorld());
+        out.setX(loc.getBlockX() - root.getBlockX());
+        out.setY(loc.getBlockY() - root.getBlockY());
+        out.setZ(loc.getBlockZ() - root.getBlockZ());
     }
 }
