@@ -69,7 +69,7 @@ public class WellList {
     }
 
     public void saveWellOwner(Well well) {
-        db.saveWellOwner(well.getDbID(), well.getOwner());
+        db.setWellOwner(well.getDbID(), well.getOwner());
     }
 
     public Well[] getWellsByOwnerAndName(UUID owner, String name) {
@@ -101,5 +101,9 @@ public class WellList {
         int numWells = db.getNumberOfWells();
         int wellID = random.nextInt(numWells);
         return getWellByID(wellID);
+    }
+
+    public void setWellName(Well well, String name) {
+        db.setWellName(well.getDbID(), name);
     }
 }

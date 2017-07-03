@@ -33,7 +33,9 @@ public interface WellDB {
 
     Location getWellLocation(int wellID);
 
-    void saveWellOwner(int wellID, UUID owner);
+    void setWellOwner(int wellID, UUID owner);
+
+    void setWellName(int wellID, String name);
 
     void setHomeWell(UUID owner, Well homeWell);
 

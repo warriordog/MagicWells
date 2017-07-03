@@ -350,7 +350,7 @@ public class InternalDB implements WellDB {
     }
 
     @Override
-    public void saveWellOwner(int wellID, UUID owner) {
+    public void setWellOwner(int wellID, UUID owner) {
         try {
             if (owner == null) {
                 deleteWellOwnerStatement.setInt(1, wellID);
@@ -374,6 +374,21 @@ public class InternalDB implements WellDB {
                         throw new RuntimeException("Error inserting well owner.");
                     }
                 }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to save well owner.", e);
+        }
+    }
+
+    @Override
+    public void setWellName(int wellID, String name) {
+        try {
+            // update, so backwards
+            updateWellNameStatement.setString(1, name);
+            updateWellNameStatement.setInt(2, wellID);
+
+            if (updateWellNameStatement.executeUpdate() < 0) {
+                throw new RuntimeException("Error saving well name.");
             }
         } catch (SQLException e) {
             throw new RuntimeException("Unable to save well owner.", e);

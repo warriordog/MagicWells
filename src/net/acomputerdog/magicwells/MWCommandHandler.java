@@ -127,7 +127,24 @@ public class MWCommandHandler {
 
     private void handleRename(CommandSender sender, String[] args) {
         if (checkPerms(sender, "mwrename")) {
-            sendYellow(sender, "Sorry, that command is not implemented.");
+            if (sender instanceof Player) {
+                Player p = (Player)sender;
+                if (args.length == 2) {
+                    Well[] wells = plugin.getWellList().getWellsByOwnerAndNameOrID(p.getUniqueId(), args[0]);
+                    if (wells.length == 1) {
+                        plugin.getWellList().setWellName(wells[0], args[1]);
+                        sendAqua(p, "Name changed.");
+                    } else if (wells.length == 0) {
+                        sendRed(p, "No wells were found.");
+                    } else {
+                        sendRed(p, "Multiple wells match that name, please use an ID.");
+                    }
+                } else {
+                    sendRed(sender, "You must specify the well name/id and the name to set it to.");
+                }
+            } else {
+                sendRed(sender, "You must be a player to use that command.");
+            }
         }
     }
 

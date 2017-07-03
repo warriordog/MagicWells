@@ -23,6 +23,12 @@ Currently supported commands:
 * /mwinfo - list your claimed wells
 * /mwsethome <name> - set your home well
 * /mwreload - reload the plugin
+* /mwrename <well> <name> - rename a well
+
+*General note: anywhere that a well is selected by name,
+its numerical ID number can be used.  This is useful in
+cases where a player has multiple wells with the same
+name.*
 
 Configuration options:
 * config.yml - global plugin settings
