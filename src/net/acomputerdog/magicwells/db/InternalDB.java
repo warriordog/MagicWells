@@ -44,6 +44,7 @@ public class InternalDB implements WellDB {
     private PreparedStatement getWellBB1Statement;
     private PreparedStatement getWellBB2Statement;
 
+    private PreparedStatement numWellBBsInArea;
     public InternalDB(PluginMagicWells plugin) {
         this.plugin = plugin;
     }
@@ -102,6 +103,9 @@ public class InternalDB implements WellDB {
 
             getWellsFromOwner = connection.prepareStatement("SELECT wellID FROM WellOwners WHERE ownerUUID = ?");
             getWellsFromOwnerAndName = connection.prepareStatement("SELECT WellOwners.wellID FROM WellOwners INNER JOIN WellNames ON WellOwners.wellID = WellNames.wellID WHERE WellOwners.ownerUUID = ? AND wellNames.wellName LIKE ?");
+
+            //X1 X2 X1 X2 Z1 Z2 Z1 Z2
+            numWellBBsInArea = connection.prepareStatement("SELECT COUNT(DISTINCT wellID) FROM WellBBs WHERE ((x1 >= ? AND x1 <= ?) OR (x2 >= ? AND x2 >= ?)) AND ((z1 >= ? AND z1 <= ?) OR (z2 >= ? AND z2 >= ?))");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("HSQLDB is missing from the jar!  Please add it or use an external database.", e);
         } catch (SQLException e) {
@@ -404,6 +408,28 @@ public class InternalDB implements WellDB {
             return wells;
         } catch (SQLException e) {
             throw new RuntimeException("Unable to look up wells by owner.", e);
+        }
+    }
+
+    @Override
+    public int numWellBBsInRange(int x1, int z1, int x2, int z2) {
+        try {
+            numWellBBsInArea.setInt(1, x1);
+            numWellBBsInArea.setInt(2, x2);
+            numWellBBsInArea.setInt(3, x1);
+            numWellBBsInArea.setInt(4, x2);
+            numWellBBsInArea.setInt(5, z1);
+            numWellBBsInArea.setInt(6, z2);
+            numWellBBsInArea.setInt(7, z1);
+            numWellBBsInArea.setInt(8, z2);
+
+            ResultSet res = numWellBBsInArea.executeQuery();
+            if (!res.next()) {
+                throw new RuntimeException("Error counting wells");
+            }
+            return res.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to count wells in area.", e);
         }
     }
 

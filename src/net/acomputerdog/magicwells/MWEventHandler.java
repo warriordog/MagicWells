@@ -81,7 +81,7 @@ public class MWEventHandler implements Listener {
             well.setOwner(p.getUniqueId());
             plugin.getWellList().saveWellOwner(well);
             p.sendMessage(ChatColor.AQUA + "You have claimed " + ChatColor.YELLOW + well.getName() + ChatColor.AQUA + "!");
-        } else if (well.getOwner() == p.getUniqueId()) {
+        } else if (well.getOwner().equals(p.getUniqueId())) {
             p.sendMessage(ChatColor.AQUA + "This is your well, " + ChatColor.YELLOW + well.getName() + ChatColor.AQUA + ".");
         } else {
             p.sendMessage(ChatColor.RED + "The water around you churns and tries to drag you down.  This well belongs to someone else!");

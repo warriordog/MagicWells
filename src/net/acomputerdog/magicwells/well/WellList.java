@@ -59,7 +59,7 @@ public class WellList {
         int bX = c.getX() * 16;
         int bZ = c.getZ() * 16;
 
-        return db.numWellsInRange(bX, bZ, bX + 15, bZ + 15) > 0;
+        return db.numWellBBsInRange(bX, bZ, bX + 15, bZ + 15) > 0;
     }
 
     public Well getWellByCollision(Location l) {

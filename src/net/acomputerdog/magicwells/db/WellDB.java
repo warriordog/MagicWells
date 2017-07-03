@@ -35,4 +35,6 @@ public interface WellDB {
     Well[] getWellsByOwnerAndName(UUID owner, String name);
 
     Well[] getWellsByOwner(UUID owner);
+
+    int numWellBBsInRange(int x1, int z1, int x2, int z2);
 }
