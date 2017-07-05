@@ -137,12 +137,12 @@ public class InternalDB implements WellDB {
 
     private void verifyDB() {
         try {
-            createTable("CREATE TABLE IF NOT EXISTS Wells (wellID INTEGER IDENTITY, worldName VARCHAR(100), locX INTEGER NOT NULL, locY INTEGER NOT NULL, locZ INTEGER NOT NULL, PRIMARY KEY (wellID))");
-            createTable("CREATE TABLE IF NOT EXISTS WellNames (wellID INTEGER NOT NULL, wellName VARCHAR(50) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
-            createTable("CREATE TABLE IF NOT EXISTS WellOwners (wellID INTEGER NOT NULL, ownerUUID CHAR(36) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
-            createTable("CREATE TABLE IF NOT EXISTS WellTriggers (wellID INTEGER NOT NULL, worldName VARCHAR(100), offX INTEGER NOT NULL, offY INTEGER NOT NULL, offZ INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
-            createTable("CREATE TABLE IF NOT EXISTS WellBBs (wellID INTEGER NOT NULL, worldName VARCHAR(100), x1 INTEGER NOT NULL, y1 INTEGER NOT NULL, z1 INTEGER NOT NULL, x2 INTEGER NOT NULL, y2 INTEGER NOT NULL, z2 INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
-            createTable("CREATE TABLE IF NOT EXISTS WellHomes (ownerUUID CHAR(36), wellID INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            createTable("CREATE CACHED TABLE IF NOT EXISTS Wells (wellID INTEGER IDENTITY, worldName VARCHAR(100), locX INTEGER NOT NULL, locY INTEGER NOT NULL, locZ INTEGER NOT NULL, PRIMARY KEY (wellID))");
+            createTable("CREATE CACHED TABLE IF NOT EXISTS WellNames (wellID INTEGER NOT NULL, wellName VARCHAR(50) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            createTable("CREATE CACHED TABLE IF NOT EXISTS WellOwners (wellID INTEGER NOT NULL, ownerUUID CHAR(36) NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            createTable("CREATE CACHED TABLE IF NOT EXISTS WellTriggers (wellID INTEGER NOT NULL, worldName VARCHAR(100), offX INTEGER NOT NULL, offY INTEGER NOT NULL, offZ INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            createTable("CREATE CACHED TABLE IF NOT EXISTS WellBBs (wellID INTEGER NOT NULL, worldName VARCHAR(100), x1 INTEGER NOT NULL, y1 INTEGER NOT NULL, z1 INTEGER NOT NULL, x2 INTEGER NOT NULL, y2 INTEGER NOT NULL, z2 INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
+            createTable("CREATE CACHED TABLE IF NOT EXISTS WellHomes (ownerUUID CHAR(36), wellID INTEGER NOT NULL, FOREIGN KEY (wellID) REFERENCES Wells(wellID))");
         } catch (SQLException e) {
             throw new RuntimeException("SQL error while verifying database", e);
         }
